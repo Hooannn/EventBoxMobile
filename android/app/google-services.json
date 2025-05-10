@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "775904274564",
+    "project_id": "eventbox-9ca55",
+    "storage_bucket": "eventbox-9ca55.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:775904274564:android:ab355e82aabc6e65783ad1",
+        "android_client_info": {
+          "package_name": "com.eventbox"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBS9x-WaTvyiZHNhYHlPKQ2bd0kb2OHK4M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
