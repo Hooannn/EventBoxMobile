@@ -2,8 +2,12 @@ import {useEffect} from 'react';
 import axios from 'axios';
 import useAppStore from '../store/app.store';
 import {getUniqueId} from 'react-native-device-info';
+import useAuthStore from '../store/auth.store';
+import {useToastController} from '@tamagui/toast';
+import useRefreshToken from './useRefreshToken';
 
-const BACKEND_URL = 'https://api.example.com'; // Replace with your backend URL
+const BACKEND_URL =
+  'https://d0e7-2001-ee0-4f15-6ab0-dcbb-7855-1eb2-cb56.ngrok-free.app/api';
 
 export const axiosIns = axios.create({
   baseURL: BACKEND_URL,
@@ -13,20 +17,39 @@ export const axiosIns = axios.create({
   },
 });
 
+export const rawAxios = axios.create({
+  baseURL: BACKEND_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  },
+});
+
 const useAxios = () => {
+  const toast = useToastController();
+  const reset = useAuthStore(state => state.reset);
   const deviceId = useAppStore(state => state.deviceId);
   const setDeviceId = useAppStore(state => state.setDeviceId);
-  const handleError = () => {};
+  const accessToken = useAuthStore(state => state.accessToken);
+  const refreshToken = useRefreshToken();
 
-  const refreshToken = async () => {
-    return '';
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleError = () => {
+    toast?.show('Phiên đăng nhập hết hạn', {
+      message: 'Vui lòng đăng nhập lại để tiếp tục sử dụng ưng dụng',
+      native: false,
+      customData: {
+        theme: 'yellow',
+      },
+    });
+    reset();
   };
 
   useEffect(() => {
     const requestIntercept = axiosIns.interceptors.request.use(
       async config => {
         if (!config.headers['Authorization']) {
-          const token = 'your_token_here';
+          const token = accessToken;
           config.headers['Authorization'] = `Bearer ${token}`;
         }
         if (!config.headers['x-device-id']) {
@@ -47,11 +70,7 @@ const useAxios = () => {
       response => response,
       async error => {
         const prevRequest = error?.config;
-        if (
-          error?.response?.status === 401 &&
-          error?.response?.data?.message === 'expired_token' &&
-          !prevRequest?.sent
-        ) {
+        if (error?.response?.status === 401 && !prevRequest?.sent) {
           prevRequest.sent = true;
           let token: string | null = null;
           try {
@@ -66,7 +85,6 @@ const useAxios = () => {
             headers: prevRequest.headers.toJSON(),
           });
         }
-
         return Promise.reject(error);
       },
     );
@@ -75,7 +93,7 @@ const useAxios = () => {
       axiosIns.interceptors.request.eject(requestIntercept);
       axiosIns.interceptors.response.eject(responseIntercept);
     };
-  }, [deviceId, setDeviceId]);
+  }, [accessToken, deviceId, handleError, refreshToken, setDeviceId]);
 
   return axiosIns;
 };

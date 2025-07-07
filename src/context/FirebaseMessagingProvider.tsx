@@ -2,7 +2,6 @@ import {PropsWithChildren, useEffect} from 'react';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
 import {requestNotifications} from 'react-native-permissions';
-import {getUniqueId} from 'react-native-device-info';
 
 export default function FirebaseMessagingProvider({
   children,

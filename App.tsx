@@ -14,7 +14,7 @@ import {
 } from 'react-native-safe-area-context';
 import Navigation from './src/navigation';
 import {TamaguiProvider} from '@tamagui/core';
-import {YStack} from 'tamagui';
+import {PortalProvider, YStack} from 'tamagui';
 import FirebaseMessagingProvider from './src/context/FirebaseMessagingProvider';
 const queryClient = new QueryClient();
 
@@ -29,17 +29,24 @@ const SafeAreaProviderWrapper = () => {
 const App = () => {
   const {left, top, right} = useSafeAreaInsets();
   return (
-    <FirebaseMessagingProvider>
-      <TamaguiProvider config={config} defaultTheme="light">
-        <ToastProvider>
-          <CurrentToast />
-
-          <QueryClientProvider client={queryClient}>
-            <Navigation />
-          </QueryClientProvider>
-        </ToastProvider>
-      </TamaguiProvider>
-    </FirebaseMessagingProvider>
+    <PortalProvider>
+      <FirebaseMessagingProvider>
+        <TamaguiProvider config={config} defaultTheme="light">
+          <ToastProvider>
+            <CurrentToast />
+            <ToastViewport
+              flexDirection="column-reverse"
+              top={top}
+              right={right}
+              left={left}
+            />
+            <QueryClientProvider client={queryClient}>
+              <Navigation />
+            </QueryClientProvider>
+          </ToastProvider>
+        </TamaguiProvider>
+      </FirebaseMessagingProvider>
+    </PortalProvider>
   );
 };
 
