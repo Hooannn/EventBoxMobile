@@ -13,6 +13,7 @@ import useAuthStore from '../store/auth.store';
 import TicketsScreen from '../screens/tickets/TicketsScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import {Home, Tickets, CircleUserRound} from '@tamagui/lucide-icons';
+import EventDetailScreen from '../screens/home/EventDetailScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -26,6 +27,7 @@ export const SCREENS = {
   FORGOT_PASSWORD: 'ForgotPassword',
   RESET_PASSWORD: 'ResetPassword',
   VERIFY_ACCOUNT: 'VerifyAccount',
+  EVENT_DETAIL: 'EventDetail',
 };
 
 const Navigation = () => {
@@ -70,6 +72,10 @@ const Navigation = () => {
     return (
       <Stack.Navigator screenOptions={{headerShown: false}}>
         <Stack.Screen name={SCREENS.HOME} component={tabNavigation} />
+        <Stack.Screen
+          name={SCREENS.EVENT_DETAIL}
+          component={EventDetailScreen}
+        />
       </Stack.Navigator>
     );
   };

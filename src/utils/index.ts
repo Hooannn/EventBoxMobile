@@ -93,6 +93,30 @@ const getFirstShowStartTime = (event: IEvent) => {
   return undefined;
 };
 
+const getFirstShowStartTimeV2 = (event: IEvent) => {
+  if (event.shows && event.shows.length > 0) {
+    const latestShow = event.shows.reduce((prev, current) => {
+      return dayjs(prev.start_time).isBefore(dayjs(current.start_time))
+        ? prev
+        : current;
+    });
+    return dayjs(latestShow.start_time).format('D MMMM, YYYY');
+  }
+  return undefined;
+};
+
+const getMinimumShowTicketPrice = (event: IEvent) => {
+  if (event.shows && event.shows.length > 0) {
+    const prices = event.shows.map(show =>
+      show.tickets.reduce((min, ticket) => {
+        return Math.min(min, ticket.price);
+      }, Infinity),
+    );
+    return Math.min(...prices);
+  }
+  return undefined;
+};
+
 const getMessage = (code: string) => {
   const message = (dictionary as any)[code];
   if (message) {
@@ -112,4 +136,6 @@ export {
   getEventBackground,
   getMessage,
   getFirstShowStartTime,
+  getFirstShowStartTimeV2,
+  getMinimumShowTicketPrice,
 };

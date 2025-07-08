@@ -10,4 +10,5 @@ dayjs.extend(weekday);
 export const setLocale = (locale: 'vi' | 'en' | null) => {
   return dayjs.locale(locale as string);
 };
+setLocale('vi');
 export default dayjs;
