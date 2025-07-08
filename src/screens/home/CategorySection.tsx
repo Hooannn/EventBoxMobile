@@ -1,12 +1,15 @@
-import {Spinner, Stack, Text, YStack} from 'tamagui';
+import {Button, Spinner, Stack, Text, XStack, YStack} from 'tamagui';
 import {ICategory, IEvent, IResponseData} from '../../types';
 import useAxios from '../../hooks/useAxios';
 import {useQuery} from '@tanstack/react-query';
-import {Ticket} from '@tamagui/lucide-icons';
+import {Ticket, ChevronRight} from '@tamagui/lucide-icons';
 import {FlatList} from 'react-native';
 import EventCard from './EventCard';
 
-export default function CategorySection(props: {category: ICategory}) {
+export default function CategorySection(props: {
+  category: ICategory;
+  onPress: (event: IEvent) => void;
+}) {
   const axios = useAxios();
 
   const getEventsQuery = useQuery({
@@ -19,11 +22,22 @@ export default function CategorySection(props: {category: ICategory}) {
   });
 
   const events = getEventsQuery.data?.data?.data || [];
+
   return (
-    <YStack key={'FeaturedCategory' + props.category.id} gap={2}>
-      <Text fontSize={'$5'} fontWeight={'700'}>
-        {props.category.name_vi}
-      </Text>
+    <YStack key={'FeaturedCategory' + props.category.id} gap={5}>
+      <XStack alignItems="center" justifyContent="space-between">
+        <Text fontSize={'$5'} fontWeight={'700'}>
+          {props.category.name_vi}
+        </Text>
+        <Button
+          opacity={0.8}
+          backgroundColor={'transparent'}
+          size="$3"
+          iconAfter={<ChevronRight size={16} />}>
+          Xem thêm
+        </Button>
+      </XStack>
+
       {getEventsQuery.isLoading ? (
         <Stack paddingVertical={40}>
           <Spinner />
@@ -37,21 +51,23 @@ export default function CategorySection(props: {category: ICategory}) {
               keyExtractor={item => `EventByCategory-${item.id}`}
               columnWrapperStyle={{
                 justifyContent: 'space-between',
-                marginBottom: 16,
+                marginBottom: 12,
                 gap: 4,
               }}
-              renderItem={({item}) => (
-                <Stack
-                  height={200}
-                  flex={1}
-                  key={'EventByCategoryEventCardInner' + item.id}>
-                  <EventCard
-                    showOverview
-                    event={item}
-                    onPress={(event: IEvent) => {}}
-                  />
-                </Stack>
-              )}
+              renderItem={({item}) => {
+                return (
+                  <Stack
+                    height={200}
+                    width={'50%'}
+                    key={'EventByCategoryEventCardInner' + item.id}>
+                    <EventCard
+                      showOverview
+                      event={item}
+                      onPress={props.onPress}
+                    />
+                  </Stack>
+                );
+              }}
             />
           ) : (
             <Stack paddingVertical={20} alignItems="center" gap={4}>

@@ -17,8 +17,8 @@ export default function EventCard(props: {
   return (
     <YStack flex={1} gap={4}>
       <Card
+        borderRadius={props.showOverview ? '$3' : 0}
         bordered={false}
-        borderRadius={0}
         animation="bouncy"
         elevation={0}
         elevate={false}
