@@ -24,7 +24,7 @@ export default function HomeScreen() {
   const progress = useSharedValue<number>(0);
 
   const onEventCardPress = (event: IEvent) => {
-    navigation.navigate('EventDetail', event);
+    navigation.navigate('EventDetail', {id: event.id});
   };
 
   const onPressPagination = (index: number) => {

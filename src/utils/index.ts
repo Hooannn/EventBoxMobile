@@ -128,7 +128,15 @@ const getMessage = (code: string) => {
   return null;
 };
 
+const isSubsribed = (org?: IOrganization, user?: IUser) => {
+  if (!org || !user) {
+    return false;
+  }
+  return user.subscriptions.some(subscription => subscription.id === org.id);
+};
+
 export {
+  isSubsribed,
   getUserAvatar,
   getOrganizationLogo,
   organizationRoleColors,

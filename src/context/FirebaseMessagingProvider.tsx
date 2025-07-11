@@ -1,7 +1,10 @@
 import {PropsWithChildren, useEffect} from 'react';
-import messaging from '@react-native-firebase/messaging';
-import notifee from '@notifee/react-native';
+import messaging, {
+  FirebaseMessagingTypes,
+} from '@react-native-firebase/messaging';
+import notifee, {AndroidStyle} from '@notifee/react-native';
 import {requestNotifications} from 'react-native-permissions';
+import {isReadyRef, navigationRef} from 'react-navigation-helpers';
 
 export default function FirebaseMessagingProvider({
   children,
@@ -13,12 +16,24 @@ export default function FirebaseMessagingProvider({
     });
   };
 
+  const handleEventData = (
+    notificationOpen: FirebaseMessagingTypes.RemoteMessage,
+  ) => {
+    const {data} = notificationOpen;
+    if (data) {
+      if (data.type === 'event') {
+        const eventId = data.event_id;
+        if (isReadyRef.current) {
+          navigationRef.navigate('EventDetail', {id: eventId});
+        }
+      }
+    }
+  };
+
   const handleInitialNotification = async () => {
     const notificationOpen = await messaging().getInitialNotification();
     if (notificationOpen) {
-      const {data} = notificationOpen;
-      console.log('Notification caused app to open from quit state:', data);
-      // Handle the notification data here
+      handleEventData(notificationOpen);
     }
   };
 
@@ -36,10 +51,15 @@ export default function FirebaseMessagingProvider({
       notifee.displayNotification({
         title: message.notification?.title,
         body: message.notification?.body,
+        data: message.data,
         android: {
           channelId: 'default',
           pressAction: {
             id: 'default',
+          },
+          style: {
+            type: AndroidStyle.BIGPICTURE,
+            picture: message.notification?.android?.imageUrl ?? '',
           },
         },
       });
@@ -47,11 +67,7 @@ export default function FirebaseMessagingProvider({
 
     const unsubscribeNotificationOpenedApp =
       messaging().onNotificationOpenedApp(notificationOpen => {
-        console.log(
-          'Notification caused app to open from background state:',
-          notificationOpen.notification,
-        );
-        // Handle the notification data here
+        handleEventData(notificationOpen);
       });
 
     const unsubscribeOnTokenRefresh = messaging().onTokenRefresh(token => {
@@ -68,6 +84,7 @@ export default function FirebaseMessagingProvider({
       unsubscribeNotificationOpenedApp();
       unsubscribeOnTokenRefresh();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return children;
 }

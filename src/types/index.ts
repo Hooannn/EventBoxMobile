@@ -66,6 +66,7 @@ export interface IUser {
   birthday: string | null;
   roles: IRole[];
   assets: IAsset[];
+  subscriptions: IOrganization[];
 }
 
 export type IAssetUsage =
