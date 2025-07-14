@@ -89,10 +89,11 @@ export default function EventDetailScreen() {
     );
   }, [event]);
 
-  const onBookingPress = () => {
-    // Handle booking action here
-    toast.show('Đang chuyển đến trang đặt vé');
-    console.log('Booking button pressed');
+  const onBookingPress = (eventShowId: number) => {
+    navigation.navigate('CheckOut', {
+      event: event,
+      eventShowId,
+    });
   };
 
   const selectShowPress = () => {
@@ -120,7 +121,7 @@ export default function EventDetailScreen() {
       <Button
         theme={'accent'}
         borderRadius={0}
-        onPress={onBookingPress}
+        onPress={() => onBookingPress(event.shows[0].id)}
         flex={1}
         height={52}
         paddingHorizontal={24}>
@@ -398,7 +399,7 @@ export default function EventDetailScreen() {
                                     </Text>
                                   </XStack>
                                   <Button
-                                    onPress={onBookingPress}
+                                    onPress={() => onBookingPress(show.id)}
                                     maxWidth={'50%'}
                                     borderRadius={0}>
                                     Mua vé ngay
@@ -433,7 +434,8 @@ export default function EventDetailScreen() {
                                           <Text
                                             color={'darkorange'}
                                             fontSize={'$3'}>
-                                            {ticket.stock} vé
+                                            {ticket.stock}/
+                                            {ticket.initial_stock} vé
                                           </Text>
                                         ) : (
                                           <Text color={'red'} fontSize={'$3'}>

@@ -6,7 +6,7 @@ import useAuthStore from '../store/auth.store';
 import {useToastController} from '@tamagui/toast';
 import useRefreshToken from './useRefreshToken';
 
-const BACKEND_URL = 'https://97e68a68c4e0.ngrok-free.app/api';
+const BACKEND_URL = 'https://18de55424e89.ngrok-free.app/api';
 
 export const axiosIns = axios.create({
   baseURL: BACKEND_URL,

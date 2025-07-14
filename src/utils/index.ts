@@ -135,7 +135,16 @@ const isSubsribed = (org?: IOrganization, user?: IUser) => {
   return user.subscriptions.some(subscription => subscription.id === org.id);
 };
 
+const formatHoursAndMinutes = (diff: number) => {
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  const format = (n: number) => String(n).padStart(2, '0');
+  return `${format(minutes)}:${format(seconds)}`;
+};
+
 export {
+  formatHoursAndMinutes,
   isSubsribed,
   getUserAvatar,
   getOrganizationLogo,

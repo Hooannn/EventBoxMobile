@@ -25,6 +25,8 @@ export const SCREENS = {
   VERIFY_ACCOUNT: 'VerifyAccount',
   EVENT_DETAIL: 'EventDetail',
   TAB_NAVIGATION: 'TabNavigation',
+  CHECK_OUT: 'CheckOut',
+  PAYMENT: 'Payment',
 };
 
 const Navigation = () => {
