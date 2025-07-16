@@ -7,6 +7,7 @@ import SettingsScreen from '../screens/settings/SettingsScreen';
 import TicketsScreen from '../screens/tickets/TicketsScreen';
 import CheckOutScreen from '../screens/home/CheckOutScreen';
 import PaymentScreen from '../screens/home/PaymentScreen';
+import PaymentProcessingScreen from '../screens/home/PaymentProcessingScreen';
 
 export default function DefaultStack() {
   const renderTabIcon = (
@@ -47,6 +48,10 @@ export default function DefaultStack() {
       <Stack.Screen name={SCREENS.EVENT_DETAIL} component={EventDetailScreen} />
       <Stack.Screen name={SCREENS.CHECK_OUT} component={CheckOutScreen} />
       <Stack.Screen name={SCREENS.PAYMENT} component={PaymentScreen} />
+      <Stack.Screen
+        name={SCREENS.PAYMENT_PROCESSING}
+        component={PaymentProcessingScreen}
+      />
     </Stack.Navigator>
   );
 }

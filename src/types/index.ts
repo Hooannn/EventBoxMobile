@@ -182,11 +182,16 @@ export interface ITicket {
   stock: number;
 }
 
-export type IOrderStatus = 'PENDING' | 'CANCELED' | 'PROCESSING' | 'FULFILLED';
+export type IOrderStatus =
+  | 'WAITING_FOR_PAYMENT'
+  | 'PENDING'
+  | 'APPROVED'
+  | 'FULFILLED';
 export interface IOrder {
   id: number;
   created_at: string;
   updated_at: string;
+  expired_at: string;
   user_id: number;
   user: IUser;
   items: ITicketItem[];
@@ -201,7 +206,6 @@ export interface ITicketItem {
   order_id: number;
   ticket_id: number;
   ticket: ITicket;
-  quantity: number;
   place_total: number;
   traces: ITicketItemTrace[];
 }

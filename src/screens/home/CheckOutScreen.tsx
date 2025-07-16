@@ -11,7 +11,7 @@ import AppBar from '../../components/AppBar';
 import {ChevronDown, ChevronLeft, ChevronUp} from '@tamagui/lucide-icons';
 import {priceFormat} from '../../utils';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {IEvent, IResponseData} from '../../types';
+import {IEvent, IOrder, IResponseData} from '../../types';
 import useToast from '../../hooks/useToast';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import QuantityInput from '../../components/QuantityInput';
@@ -93,16 +93,7 @@ export default function CheckOutScreen() {
 
   const makeReservationMutation = useMutation({
     mutationFn: () =>
-      axios.post<
-        IResponseData<{
-          tickets: {
-            ticket_id: number;
-            quantity: number;
-          }[];
-          total_price: number;
-          expiration_date: string;
-        }>
-      >('/v1/orders/reservation', {
+      axios.post<IResponseData<IOrder>>('/v1/orders/reservation', {
         tickets: orderedTickets
           .filter(t => t.quantity > 0)
           .map(t => ({
@@ -115,9 +106,7 @@ export default function CheckOutScreen() {
       navigation.navigate('Payment', {
         event,
         eventShowId,
-        tickets: res.data.data.tickets,
-        totalPrice: res.data.data.total_price,
-        expirationDate: res.data.data.expiration_date,
+        reservation: res.data.data,
       });
     },
   });

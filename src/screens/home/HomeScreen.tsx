@@ -69,10 +69,16 @@ export default function HomeScreen() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    getDiscoveryEventsQuery.refetch().finally(() => {
+    try {
+      Promise.all([
+        getDiscoveryEventsQuery.refetch(),
+        getFeaturedCategoriesQuery.refetch(),
+      ]);
+    } catch (error) {
+    } finally {
       setRefreshing(false);
-    });
-  }, [getDiscoveryEventsQuery]);
+    }
+  }, [getDiscoveryEventsQuery, getFeaturedCategoriesQuery]);
   return (
     <YStack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       <AppBar>
@@ -202,7 +208,7 @@ export default function HomeScreen() {
                   {featuredCategories.map(category => (
                     <CategorySection
                       onPress={onEventCardPress}
-                      key={'FeaturedCategory' + category.id}
+                      key={'FeaturedCategory' + category.id + Date.now()}
                       category={category}
                     />
                   ))}

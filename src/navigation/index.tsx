@@ -27,6 +27,7 @@ export const SCREENS = {
   TAB_NAVIGATION: 'TabNavigation',
   CHECK_OUT: 'CheckOut',
   PAYMENT: 'Payment',
+  PAYMENT_PROCESSING: 'PaymentProcessing',
 };
 
 const Navigation = () => {

@@ -9,12 +9,14 @@ import {getMessage} from '../../utils';
 import useAuthStore from '../../store/auth.store';
 import useAppStore from '../../store/app.store';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import {useNavigation} from '@react-navigation/native';
 
 export default function SettingsScreen() {
   const axios = useAxios();
   const {toastOnError, toast} = useToast();
   const resetAuthStore = useAuthStore(state => state.reset);
   const resetAppStore = useAppStore(state => state.reset);
+  const navigation = useNavigation();
 
   const logoutMutation = useMutation({
     mutationFn: () =>
@@ -80,6 +82,14 @@ export default function SettingsScreen() {
             axios.get('/v1/events/test/notification');
           }}>
           test noti
+        </Button>
+        <Button
+          onPress={() => {
+            navigation.navigate('PaymentProcessing', {
+              orderId: '12345',
+            });
+          }}>
+          Socket
         </Button>
       </View>
     </>

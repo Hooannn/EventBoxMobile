@@ -16,20 +16,30 @@ import {
   priceFormat,
   stringToDateFormatV2,
 } from '../../utils';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import {IEvent, IResponseData} from '../../types';
+import {CommonActions, useNavigation, useRoute} from '@react-navigation/native';
+import {IEvent, IOrder, IResponseData, ITicket} from '../../types';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import useAuthStore from '../../store/auth.store';
 import useToast from '../../hooks/useToast';
 import useAxios from '../../hooks/useAxios';
 import {useMutation} from '@tanstack/react-query';
-import {Alert} from 'react-native';
+import {Alert, Linking} from 'react-native';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import InAppBrowser from 'react-native-inappbrowser-reborn';
 
 export default function PaymentScreen() {
-  const {toast} = useToast();
+  const {toast, toastOnError} = useToast();
+  const {user} = useAuthStore();
   const route = useRoute();
   const axios = useAxios();
+
+  const {event, eventShowId, reservation} = route.params as {
+    event: IEvent;
+    eventShowId: number;
+    reservation: IOrder;
+  };
+  const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   const cancelReservationMutation = useMutation({
     mutationFn: () =>
@@ -63,21 +73,6 @@ export default function PaymentScreen() {
     );
   };
 
-  const {event, eventShowId, tickets, totalPrice, expirationDate} =
-    route.params as {
-      event: IEvent;
-      eventShowId: number;
-      tickets: {
-        ticket_id: number;
-        quantity: number;
-      }[];
-      totalPrice: number;
-      expirationDate: string;
-    };
-  const {user} = useAuthStore();
-  const navigation = useNavigation();
-  const insets = useSafeAreaInsets();
-
   const getEventShow = () => {
     return event.shows.find(show => show.id === eventShowId);
   };
@@ -85,7 +80,7 @@ export default function PaymentScreen() {
   const [remainingTime, setRemainingTime] = useState('');
 
   useEffect(() => {
-    const targetTime = new Date(expirationDate).getTime();
+    const targetTime = new Date(reservation.expired_at).getTime();
     const now = new Date().getTime();
     const diff = targetTime - now;
     setRemainingTime(formatHoursAndMinutes(diff));
@@ -112,7 +107,7 @@ export default function PaymentScreen() {
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expirationDate]);
+  }, [reservation.expired_at]);
 
   const getTickets = () => {
     return event.shows.find(show => show.id === eventShowId)?.tickets || [];
@@ -122,12 +117,121 @@ export default function PaymentScreen() {
     return getTickets().find(ticket => ticket.id === ticketId);
   };
 
-  const getTicketValue = (ticketId: number) => {
-    const ticket = tickets.find(t => t.ticket_id === ticketId);
-    return ticket ? ticket.quantity : 0;
+  const groupTickets = () => {
+    return reservation.items.reduce<
+      {
+        ticket: ITicket;
+        quantity: number;
+      }[]
+    >((acc, item) => {
+      const ticketId = item.ticket.id;
+      const existing = acc.find(entry => entry.ticket.id === ticketId);
+
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        acc.push({ticket: item.ticket, quantity: 1});
+      }
+
+      return acc;
+    }, []);
   };
 
-  const isLoading = cancelReservationMutation.isPending;
+  const paymentMutation = useMutation({
+    mutationFn: (params: {
+      return_url: string;
+      cancel_url: string;
+      order_id: number;
+    }) => {
+      return axios.post<
+        IResponseData<{
+          id: string;
+        }>
+      >('/v1/orders/reservation/payment', params);
+    },
+    onError: toastOnError,
+    onSuccess(data) {
+      const orderId = data.data.data.id;
+      const checkoutUrl = `https://www.sandbox.paypal.com/checkoutnow?token=${orderId}`;
+      openPayPalPopup(checkoutUrl);
+    },
+  });
+
+  const onSubmitPayment = () => {
+    const returnUrl = `eventbox://paypal-return?order_id=${reservation.id}`;
+    const cancelUrl = `eventbox://paypal-cancel?order_id=${reservation.id}`;
+
+    paymentMutation.mutate({
+      order_id: reservation.id,
+      return_url: returnUrl,
+      cancel_url: cancelUrl,
+    });
+  };
+
+  async function openPayPalPopup(checkoutUrl: string) {
+    Linking.addEventListener('url', handlePayPalRedirect);
+    try {
+      if (await InAppBrowser.isAvailable()) {
+        await InAppBrowser.open(checkoutUrl, {
+          // iOS Properties
+          dismissButtonStyle: 'cancel',
+          animated: true,
+          modalPresentationStyle: 'fullScreen',
+          modalTransitionStyle: 'coverVertical',
+          modalEnabled: true,
+          enableBarCollapsing: false,
+          // Android Properties
+          showTitle: false,
+          enableUrlBarHiding: true,
+          enableDefaultShare: false,
+          forceCloseOnRedirection: false,
+        });
+      } else {
+        Linking.openURL(checkoutUrl);
+      }
+    } catch (error: any) {
+      toast.show('Lỗi', {
+        message: error.message,
+        customData: {
+          theme: 'red',
+        },
+      });
+    }
+  }
+
+  const handlePayPalRedirect = (event: {url: string}) => {
+    const url = event.url;
+    if (url.includes('paypal-return')) {
+      InAppBrowser.close();
+      toast.show('Thành công', {
+        message: 'Thanh toán thành công!',
+        customData: {
+          theme: 'green',
+        },
+      });
+
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {name: 'PaymentProcessing', params: {orderId: reservation.id}},
+          ],
+        }),
+      );
+    } else if (url.includes('paypal-cancel')) {
+      InAppBrowser.close();
+      toast.show('Hủy', {
+        message: 'Bạn đã hủy thanh toán!',
+        customData: {
+          theme: 'yellow',
+        },
+      });
+    }
+    Linking.removeAllListeners('url');
+  };
+
+  const isLoading =
+    cancelReservationMutation.isPending || paymentMutation.isPending;
 
   return (
     <>
@@ -280,27 +384,24 @@ export default function PaymentScreen() {
                 <Text fontSize={'$4'}>Số lượng</Text>
               </XStack>
               <YStack gap={16} marginTop={8}>
-                {tickets.map(ticket => (
+                {groupTickets().map(item => (
                   <XStack
                     justifyContent="space-between"
-                    key={'OrderDetails' + ticket.ticket_id}
+                    key={'OrderDetails' + item.ticket.id}
                     alignItems="center">
                     <YStack>
                       <Text fontSize={'$6'} fontWeight={700}>
-                        {getTicketById(ticket.ticket_id)!.name}
+                        {getTicketById(item.ticket.id)!.name}
                       </Text>
                       <Text fontSize={'$5'}>
-                        {priceFormat(getTicketById(ticket.ticket_id)!.price)}
+                        {priceFormat(getTicketById(item.ticket.id)!.price)}
                       </Text>
                     </YStack>
                     <YStack alignItems="flex-end">
-                      <Text fontSize={'$5'}>
-                        {getTicketValue(ticket.ticket_id)}
-                      </Text>
+                      <Text fontSize={'$5'}>{item.quantity}</Text>
                       <Text fontSize={'$5'}>
                         {priceFormat(
-                          getTicketValue(ticket.ticket_id) *
-                            getTicketById(ticket.ticket_id)!.price,
+                          item.quantity * getTicketById(item.ticket.id)!.price,
                         )}
                       </Text>
                     </YStack>
@@ -314,7 +415,7 @@ export default function PaymentScreen() {
                 marginTop={16}>
                 <Text fontSize={'$6'}>Tạm tính</Text>
                 <Text fontWeight={700} fontSize={'$7'} color={'darkgreen'}>
-                  {priceFormat(totalPrice)}
+                  {priceFormat(reservation.place_total)}
                 </Text>
               </XStack>
               <Separator />
@@ -325,7 +426,7 @@ export default function PaymentScreen() {
                 justifyContent="space-between">
                 <Text fontSize={'$6'}>Tổng tiền</Text>
                 <Text fontWeight={700} fontSize={'$8'} color={'darkgreen'}>
-                  {priceFormat(totalPrice)}
+                  {priceFormat(reservation.place_total)}
                 </Text>
               </XStack>
 
@@ -356,7 +457,7 @@ export default function PaymentScreen() {
               <Text fontSize={'$4'}>Tổng tiền</Text>
               <XStack alignItems="center" gap={8}>
                 <Text fontWeight={700} fontSize={'$8'} color={'darkgreen'}>
-                  {priceFormat(totalPrice)}
+                  {priceFormat(reservation.place_total)}
                 </Text>
               </XStack>
             </YStack>
@@ -365,6 +466,7 @@ export default function PaymentScreen() {
               theme={'accent'}
               borderRadius={0}
               flex={1}
+              onPress={onSubmitPayment}
               height={52}
               paddingHorizontal={24}>
               Thanh toán

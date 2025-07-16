@@ -6,7 +6,8 @@ import useAuthStore from '../store/auth.store';
 import {useToastController} from '@tamagui/toast';
 import useRefreshToken from './useRefreshToken';
 
-const BACKEND_URL = 'https://18de55424e89.ngrok-free.app/api';
+export const BACKEND_URL = 'https://eventboxserver.eclass.ink/api';
+export const SOCKET_URL = 'wss://eventboxsocket.eclass.ink';
 
 export const axiosIns = axios.create({
   baseURL: BACKEND_URL,
