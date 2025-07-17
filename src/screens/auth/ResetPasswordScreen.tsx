@@ -12,6 +12,7 @@ import {rawAxios} from '../../hooks/useAxios';
 import useToast from '../../hooks/useToast';
 import {getMessage} from '../../utils';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import {SCREENS} from '../../navigation';
 type ResetPasswordInputs = {
   password: string;
   confirm_password: string;
@@ -69,7 +70,7 @@ export default function ResetPasswordScreen() {
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
-        routes: [{name: 'Login'}],
+        routes: [{name: SCREENS.LOGIN}],
       }),
     );
   };
@@ -219,7 +220,7 @@ export default function ResetPasswordScreen() {
                   navigation.dispatch(
                     CommonActions.reset({
                       index: 0,
-                      routes: [{name: 'Login'}],
+                      routes: [{name: SCREENS.LOGIN}],
                     }),
                   );
                 }}>

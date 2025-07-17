@@ -28,6 +28,7 @@ export const SCREENS = {
   CHECK_OUT: 'CheckOut',
   PAYMENT: 'Payment',
   PAYMENT_PROCESSING: 'PaymentProcessing',
+  PAYMENT_SUCCESS: 'PaymentSuccess',
 };
 
 const Navigation = () => {

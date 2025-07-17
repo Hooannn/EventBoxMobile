@@ -5,6 +5,8 @@ import messaging, {
 import notifee, {AndroidStyle} from '@notifee/react-native';
 import {requestNotifications} from 'react-native-permissions';
 import {isReadyRef, navigationRef} from 'react-navigation-helpers';
+import {CommonActions} from '@react-navigation/native';
+import {SCREENS} from '../navigation';
 
 export default function FirebaseMessagingProvider({
   children,
@@ -24,7 +26,19 @@ export default function FirebaseMessagingProvider({
       if (data.type === 'event') {
         const eventId = data.event_id;
         if (isReadyRef.current) {
-          navigationRef.navigate('EventDetail', {id: eventId});
+          navigationRef.navigate(SCREENS.EVENT_DETAIL, {id: eventId});
+        }
+      }
+
+      if (data.type === 'order') {
+        const orderId = data.order_id;
+        if (isReadyRef.current) {
+          navigationRef.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{name: SCREENS.PAYMENT_SUCCESS, params: {orderId}}],
+            }),
+          );
         }
       }
     }
@@ -57,10 +71,12 @@ export default function FirebaseMessagingProvider({
           pressAction: {
             id: 'default',
           },
-          style: {
-            type: AndroidStyle.BIGPICTURE,
-            picture: message.notification?.android?.imageUrl ?? '',
-          },
+          style: message.notification?.android?.imageUrl
+            ? {
+                type: AndroidStyle.BIGPICTURE,
+                picture: message.notification?.android?.imageUrl ?? '',
+              }
+            : undefined,
         },
       });
     });

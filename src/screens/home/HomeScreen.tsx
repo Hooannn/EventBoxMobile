@@ -15,6 +15,7 @@ import {ArrowRightToLine} from '@tamagui/lucide-icons';
 import CategorySection from './CategorySection';
 import {useNavigation} from '@react-navigation/native';
 import AppBar from '../../components/AppBar';
+import {SCREENS} from '../../navigation';
 const width = Dimensions.get('window').width;
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -24,7 +25,7 @@ export default function HomeScreen() {
   const progress = useSharedValue<number>(0);
 
   const onEventCardPress = (event: IEvent) => {
-    navigation.navigate('EventDetail', {id: event.id});
+    navigation.navigate(SCREENS.EVENT_DETAIL, {id: event.id});
   };
 
   const onPressPagination = (index: number) => {

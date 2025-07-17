@@ -11,6 +11,7 @@ import useToast from '../../hooks/useToast';
 import {getMessage} from '../../utils';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import useAuthStore from '../../store/auth.store';
+import {SCREENS} from '../../navigation';
 type VerifyInputs = {
   otp: string;
 };
@@ -167,7 +168,7 @@ export default function VerifyAccountScreen() {
                   navigation.dispatch(
                     CommonActions.reset({
                       index: 0,
-                      routes: [{name: 'Login'}],
+                      routes: [{name: SCREENS.LOGIN}],
                     }),
                   );
                 }}>

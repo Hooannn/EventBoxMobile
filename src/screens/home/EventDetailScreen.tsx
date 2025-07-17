@@ -1,4 +1,8 @@
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {
   Text,
   ScrollView,
@@ -38,6 +42,7 @@ import {
   getMessage,
   getMinimumShowTicketPrice,
   getOrganizationLogo,
+  isEventShowAvailable,
   isSubsribed,
   priceFormat,
   stringToDateFormatV2,
@@ -47,9 +52,11 @@ import React from 'react';
 import ImageViewProvider from '../../components/ImageViewProvider';
 import useToast from '../../hooks/useToast';
 import useAuthStore from '../../store/auth.store';
-import useAxios from '../../hooks/useAxios';
+import useAxios, {SOCKET_URL} from '../../hooks/useAxios';
 import {useMutation, useQuery} from '@tanstack/react-query';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import {SCREENS} from '../../navigation';
+import {io} from 'socket.io-client';
 
 export default function EventDetailScreen() {
   const route = useRoute();
@@ -63,8 +70,10 @@ export default function EventDetailScreen() {
 
   const getEventQuery = useQuery({
     queryKey: ['fetch/event/id', eventId],
-    queryFn: () => axios.get<IResponseData<IEvent>>(`/v1/events/${eventId}`),
+    queryFn: () =>
+      axios.get<IResponseData<IEvent>>(`/v1/events/public/${eventId}`),
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   const [refreshing, setRefreshing] = useState(false);
@@ -90,7 +99,7 @@ export default function EventDetailScreen() {
   }, [event]);
 
   const onBookingPress = (eventShowId: number) => {
-    navigation.navigate('CheckOut', {
+    navigation.navigate(SCREENS.CHECK_OUT, {
       event: event,
       eventShowId,
     });
@@ -183,6 +192,47 @@ export default function EventDetailScreen() {
   const handleSubscribe = () => {
     subscribeMutation.mutate();
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      getEventQuery.refetch();
+      return () => {};
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
+
+  useEffect(() => {
+    const socket = io(
+      `${SOCKET_URL}/event?user_id=${authUser?.id}&event_id=${eventId}`,
+      {
+        transports: ['websocket'],
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+      },
+    );
+
+    socket.on('connect', () => {
+      console.log('✅ Connected:', socket.id);
+    });
+
+    socket.on('stock_updated', e => {
+      getEventQuery.refetch();
+    });
+
+    socket.on('disconnect', reason => {
+      console.log('❌ Disconnected:', reason);
+    });
+
+    socket.on('reconnect_attempt', attempt => {
+      console.log(`🔁 Reconnecting... (${attempt})`);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -398,12 +448,27 @@ export default function EventDetailScreen() {
                                       {stringToDateFormatV2(show.end_time)}
                                     </Text>
                                   </XStack>
-                                  <Button
-                                    onPress={() => onBookingPress(show.id)}
-                                    maxWidth={'50%'}
-                                    borderRadius={0}>
-                                    Mua vé ngay
-                                  </Button>
+                                  {isEventShowAvailable(show).available ? (
+                                    <Button
+                                      onPress={() => onBookingPress(show.id)}
+                                      maxWidth={'50%'}
+                                      borderRadius={0}>
+                                      Mua vé ngay
+                                    </Button>
+                                  ) : (
+                                    <Stack
+                                      maxWidth={'40%'}
+                                      alignItems="center"
+                                      justifyContent="flex-end">
+                                      <Text
+                                        fontWeight={800}
+                                        color={'whitesmoke'}
+                                        textAlign="right"
+                                        fontSize={'$1'}>
+                                        {isEventShowAvailable(show).reason}
+                                      </Text>
+                                    </Stack>
+                                  )}
                                 </>
                               )}
                             </Accordion.Trigger>

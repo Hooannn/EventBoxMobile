@@ -26,6 +26,7 @@ import {useMutation} from '@tanstack/react-query';
 import {Alert, Linking} from 'react-native';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
+import {SCREENS} from '../../navigation';
 
 export default function PaymentScreen() {
   const {toast, toastOnError} = useToast();
@@ -214,7 +215,10 @@ export default function PaymentScreen() {
         CommonActions.reset({
           index: 0,
           routes: [
-            {name: 'PaymentProcessing', params: {orderId: reservation.id}},
+            {
+              name: SCREENS.PAYMENT_PROCESSING,
+              params: {orderId: reservation.id},
+            },
           ],
         }),
       );

@@ -1,4 +1,4 @@
-import {IEvent, IOrganization, IUser} from '../types';
+import {IEvent, IEventShow, IOrganization, IUser} from '../types';
 import dayjs from '../libs/dayjs';
 import dictionary from './translation.json';
 
@@ -132,7 +132,7 @@ const isSubsribed = (org?: IOrganization, user?: IUser) => {
   if (!org || !user) {
     return false;
   }
-  return user.subscriptions.some(subscription => subscription.id === org.id);
+  return user.subscriptions?.some(subscription => subscription.id === org.id);
 };
 
 const formatHoursAndMinutes = (diff: number) => {
@@ -143,7 +143,30 @@ const formatHoursAndMinutes = (diff: number) => {
   return `${format(minutes)}:${format(seconds)}`;
 };
 
+const isEventShowAvailable = (eventShow: IEventShow) => {
+  const now = dayjs();
+  const saleStartTime = dayjs(eventShow.sale_start_time);
+  const saleEndTime = dayjs(eventShow.sale_end_time);
+
+  if (now.isBefore(saleStartTime)) {
+    return {
+      available: false,
+      reason: 'Mở bán từ ' + saleStartTime.format('DD/MM/YYYY, HH:mm'),
+    };
+  } else if (now.isAfter(saleEndTime)) {
+    return {
+      available: false,
+      reason: 'Đã hết thời gian bán vé',
+    };
+  }
+  return {
+    available: true,
+    reason: null,
+  };
+};
+
 export {
+  isEventShowAvailable,
   formatHoursAndMinutes,
   isSubsribed,
   getUserAvatar,

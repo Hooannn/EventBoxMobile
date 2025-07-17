@@ -10,6 +10,7 @@ import {IResponseData} from '../../types';
 import useToast from '../../hooks/useToast';
 import {getMessage} from '../../utils';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import {SCREENS} from '../../navigation';
 type ForgotPasswordInputs = {
   email: string;
 };
@@ -41,7 +42,7 @@ export default function ForgotPasswordScreen() {
 
   const onSubmit: SubmitHandler<ForgotPasswordInputs> = async data => {
     await forgotPasswordMutation.mutateAsync(data);
-    navigation.navigate('ResetPassword', {
+    navigation.navigate(SCREENS.RESET_PASSWORD, {
       email: data.email,
     });
   };

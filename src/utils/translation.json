@@ -641,5 +641,7 @@
   "you are about to approve this event": "Bạn đang phê duyệt sự kiện này. Sau khi phê duyệt, sự kiện sẽ hiển thị công khai và người dùng có thể tìm thấy sự kiện.",
   "ticket_not_found": "Không tìm thấy vé",
   "ticket_out_of_stock": "Vé đã hết",
-  "order_not_found": "Không tìm thấy đơn hàng"
+  "order_not_found": "Không tìm thấy đơn hàng",
+  "ticket_sale_not_started": "Chưa đến thời gian bán vé",
+  "ticket_sale_ended": "Đã hết thời gian bán vé"
 }

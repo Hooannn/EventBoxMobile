@@ -13,6 +13,7 @@ import useAuthStore from '../../store/auth.store';
 import {getMessage} from '../../utils';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import {SCREENS} from '../../navigation';
 type LoginInputs = {
   email: string;
   password: string;
@@ -171,7 +172,7 @@ export default function LoginScreen() {
                 borderRadius={0}
                 size={'$3'}
                 backgroundColor={'transparent'}
-                onPress={() => navigation.navigate('ForgotPassword')}>
+                onPress={() => navigation.navigate(SCREENS.FORGOT_PASSWORD)}>
                 Quên mật khẩu?
               </Button>
             </YStack>
@@ -202,7 +203,7 @@ export default function LoginScreen() {
                 borderRadius={0}
                 size={'$3'}
                 backgroundColor={'transparent'}
-                onPress={() => navigation.navigate('Register')}>
+                onPress={() => navigation.navigate(SCREENS.REGISTER)}>
                 Chưa có tài khoản? Đăng ký ngay
               </Button>
             </YStack>

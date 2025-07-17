@@ -1,44 +1,71 @@
 import React, {useEffect} from 'react';
-import {YStack, Text} from 'tamagui';
+import {ZStack, Stack, Text} from 'tamagui';
+import Lottie from 'lottie-react-native';
 import {SOCKET_URL} from '../../hooks/useAxios';
 import useAuthStore from '../../store/auth.store';
+import {io} from 'socket.io-client';
+import {CommonActions, useNavigation, useRoute} from '@react-navigation/native';
+import {SCREENS} from '../../navigation';
 
 export default function PaymentProcessingScreen() {
   const {user} = useAuthStore();
+  const navigation = useNavigation();
+  const route = useRoute();
+  const {orderId} = route.params as {orderId: string};
 
   useEffect(() => {
-    const socket = new WebSocket(`${SOCKET_URL}/notification`, [], {
-      headers: {
-        'x-user-id': user?.id.toString() ?? '',
+    const socket = io(
+      `${SOCKET_URL}/order?user_id=${user?.id}&order_id=${orderId}`,
+      {
+        transports: ['websocket'],
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
       },
+    );
+
+    socket.on('connect', () => {
+      console.log('✅ Connected:', socket.id);
     });
 
-    socket.onopen = () => {
-      console.log('WebSocket Connected');
-    };
+    socket.on('order_fulfilled', e => {
+      console.log('🎉 Order fulfilled:', e);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{name: SCREENS.PAYMENT_SUCCESS, params: {orderId}}],
+        }),
+      );
+    });
 
-    socket.onmessage = event => {
-      console.log('Message received:', event.data);
-    };
+    socket.on('disconnect', reason => {
+      console.log('❌ Disconnected:', reason);
+    });
 
-    socket.onerror = error => {
-      console.error('WebSocket Error:', error.message);
-    };
-
-    socket.onclose = () => {
-      console.log('WebSocket Disconnected');
-    };
+    socket.on('reconnect_attempt', attempt => {
+      console.log(`🔁 Reconnecting... (${attempt})`);
+    });
 
     return () => {
-      if (socket.readyState === WebSocket.OPEN) {
-        socket.close();
-      }
+      socket.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <YStack flex={1} justifyContent="center" alignItems="center">
-      <Text>PaymentProcessingScreen</Text>
-    </YStack>
+    <ZStack animation={'100ms'} fullscreen backgroundColor={'whitesmoke'}>
+      <Stack alignItems="center" justifyContent="center" flex={1}>
+        <Lottie
+          autoPlay
+          loop
+          style={{width: 200, height: 200}}
+          source={require('../../assets/PaymentProcessing.json')}
+        />
+        <Text maxWidth={'80%'} textAlign="center" fontSize="$3" color="$color">
+          Hãy đợi trong giây lát, đơn hàng{' '}
+          <Text fontWeight={700}>#{orderId}</Text> của bạn đang được xử lý...
+          Vui lòng không rời khỏi trang này cho đến khi quá trình hoàn tất.
+        </Text>
+      </Stack>
+    </ZStack>
   );
 }

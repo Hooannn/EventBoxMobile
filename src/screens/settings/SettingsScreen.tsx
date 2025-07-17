@@ -34,24 +34,11 @@ export default function SettingsScreen() {
     },
   });
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const logout = async () => {
-    try {
-      setIsLoading(true);
-      await logoutMutation.mutateAsync();
-    } catch (error) {
-      toast.show('Lỗi', {
-        message: 'Đăng xuất không thành công, vui lòng thử lại sau',
-        customData: {
-          theme: 'red',
-        },
-      });
-    } finally {
-      setIsLoading(false);
-      resetAppStore();
+    logoutMutation.mutateAsync().finally(() => {
       resetAuthStore();
-    }
+      resetAppStore();
+    });
   };
 
   const handleLogout = () => {
@@ -74,7 +61,7 @@ export default function SettingsScreen() {
   };
   return (
     <>
-      {isLoading && <LoadingOverlay />}
+      {logoutMutation.isPending && <LoadingOverlay />}
       <View flex={1} justifyContent="center" alignItems="center">
         <Button onPress={handleLogout}>Logout</Button>
         <Button
@@ -90,6 +77,15 @@ export default function SettingsScreen() {
             });
           }}>
           Socket
+        </Button>
+
+        <Button
+          onPress={() => {
+            navigation.navigate('PaymentSuccess', {
+              orderId: '12345',
+            });
+          }}>
+          Success
         </Button>
       </View>
     </>

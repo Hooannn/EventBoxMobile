@@ -12,6 +12,7 @@ import useToast from '../../hooks/useToast';
 import {getMessage} from '../../utils';
 import {useMutation} from '@tanstack/react-query';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import {SCREENS} from '../../navigation';
 type RegisterInputs = {
   first_name: string;
   last_name: string;
@@ -77,7 +78,7 @@ export default function RegisterScreen() {
       firstName: data.first_name,
       lastName: data.last_name,
     });
-    navigation.navigate('VerifyAccount', {
+    navigation.navigate(SCREENS.VERIFY_ACCOUNT, {
       email: data.email,
     });
   };
@@ -278,7 +279,7 @@ export default function RegisterScreen() {
                 borderRadius={0}
                 size={'$3'}
                 backgroundColor={'transparent'}
-                onPress={() => navigation.navigate('ForgotPassword')}>
+                onPress={() => navigation.navigate(SCREENS.FORGOT_PASSWORD)}>
                 Quên mật khẩu?
               </Button>
             </YStack>
@@ -313,7 +314,7 @@ export default function RegisterScreen() {
                   navigation.dispatch(
                     CommonActions.reset({
                       index: 0,
-                      routes: [{name: 'Login'}],
+                      routes: [{name: SCREENS.LOGIN}],
                     }),
                   );
                 }}>

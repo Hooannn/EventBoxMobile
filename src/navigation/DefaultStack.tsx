@@ -8,6 +8,8 @@ import TicketsScreen from '../screens/tickets/TicketsScreen';
 import CheckOutScreen from '../screens/home/CheckOutScreen';
 import PaymentScreen from '../screens/home/PaymentScreen';
 import PaymentProcessingScreen from '../screens/home/PaymentProcessingScreen';
+import PaymentSuccessScreen from '../screens/home/PaymentSuccess';
+import {useRoute} from '@react-navigation/native';
 
 export default function DefaultStack() {
   const renderTabIcon = (
@@ -27,8 +29,11 @@ export default function DefaultStack() {
   };
 
   const TabNavigation = () => {
+    const route = useRoute();
+    const initialTab = route.params?.initialTab || SCREENS.HOME;
     return (
       <Tab.Navigator
+        initialRouteName={initialTab}
         screenOptions={({route}) => ({
           tabBarActiveTintColor: '#121212',
           tabBarInactiveTintColor: '#757575',
@@ -51,6 +56,10 @@ export default function DefaultStack() {
       <Stack.Screen
         name={SCREENS.PAYMENT_PROCESSING}
         component={PaymentProcessingScreen}
+      />
+      <Stack.Screen
+        name={SCREENS.PAYMENT_SUCCESS}
+        component={PaymentSuccessScreen}
       />
     </Stack.Navigator>
   );

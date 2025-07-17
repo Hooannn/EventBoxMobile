@@ -29,6 +29,7 @@
     "@tanstack/react-query": "^5.75.4",
     "axios": "^1.9.0",
     "burnt": "^0.11.7",
+    "lottie-react-native": "^7.2.4",
     "react": "19.0.0",
     "react-hook-form": "^7.60.0",
     "react-native": "0.79.2",
@@ -46,6 +47,7 @@
     "react-native-svg": "^15.12.0",
     "react-native-webview": "^13.13.5",
     "react-navigation-helpers": "^2.3.1",
+    "socket.io-client": "^4.8.1",
     "tamagui": "^1.130.8",
     "zustand": "^5.0.4"
   },

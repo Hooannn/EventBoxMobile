@@ -24,6 +24,7 @@ import {
 import useAxios from '../../hooks/useAxios';
 import {useMutation} from '@tanstack/react-query';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import {SCREENS} from '../../navigation';
 
 export default function CheckOutScreen() {
   const route = useRoute();
@@ -103,7 +104,7 @@ export default function CheckOutScreen() {
       }),
     onError: toastOnError,
     onSuccess: res => {
-      navigation.navigate('Payment', {
+      navigation.navigate(SCREENS.PAYMENT, {
         event,
         eventShowId,
         reservation: res.data.data,
