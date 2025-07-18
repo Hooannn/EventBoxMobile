@@ -209,7 +209,7 @@ export default function HomeScreen() {
                   {featuredCategories.map(category => (
                     <CategorySection
                       onPress={onEventCardPress}
-                      key={'FeaturedCategory' + category.id + Date.now()}
+                      key={'FeaturedCategory' + category.id}
                       category={category}
                     />
                   ))}

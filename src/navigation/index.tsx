@@ -10,6 +10,7 @@ import AuthStack from './AuthStack';
 import useAppStore from '../store/app.store';
 import useAxios from '../hooks/useAxios';
 import {Platform} from 'react-native';
+import OrganizerStack from './OrganizerStack';
 
 export const Stack = createStackNavigator();
 export const Tab = createBottomTabNavigator();
@@ -29,14 +30,19 @@ export const SCREENS = {
   PAYMENT: 'Payment',
   PAYMENT_PROCESSING: 'PaymentProcessing',
   PAYMENT_SUCCESS: 'PaymentSuccess',
+  TICKET_ITEM_DETAIL: 'TicketItemDetail',
+  ORGANIZATION: 'Organization',
 };
 
 const Navigation = () => {
-  React.useEffect((): any => {
-    return () => (isReadyRef.current = false);
+  React.useEffect(() => {
+    return () => {
+      isReadyRef.current = false;
+    };
   }, []);
 
   const isLoggedIn = useAuthStore(state => state.isLoggedIn);
+  const layout = useAppStore(state => state.layout);
   const setPushToken = useAppStore(state => state.setPushToken);
   const axios = useAxios();
 
@@ -60,7 +66,11 @@ const Navigation = () => {
   }, [isLoggedIn]);
 
   const renderStack = () => {
-    return isLoggedIn ? DefaultStack() : AuthStack();
+    return isLoggedIn
+      ? layout === 'user'
+        ? DefaultStack()
+        : OrganizerStack()
+      : AuthStack();
   };
 
   return (

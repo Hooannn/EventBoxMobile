@@ -27,7 +27,8 @@ export const rawAxios = axios.create({
 
 const useAxios = () => {
   const toast = useToastController();
-  const reset = useAuthStore(state => state.reset);
+  const resetAuthStore = useAuthStore(state => state.reset);
+  const resetAppStore = useAppStore(state => state.reset);
   const deviceId = useAppStore(state => state.deviceId);
   const setDeviceId = useAppStore(state => state.setDeviceId);
   const accessToken = useAuthStore(state => state.accessToken);
@@ -42,7 +43,8 @@ const useAxios = () => {
         theme: 'yellow',
       },
     });
-    reset();
+    resetAuthStore();
+    resetAppStore();
   };
 
   useEffect(() => {
@@ -56,8 +58,10 @@ const useAxios = () => {
           if (!deviceId) {
             const uniqueId = await getUniqueId();
             setDeviceId(uniqueId);
+            config.headers['x-device-id'] = uniqueId;
+          } else {
+            config.headers['x-device-id'] = deviceId;
           }
-          config.headers['x-device-id'] = deviceId;
         }
         return config;
       },

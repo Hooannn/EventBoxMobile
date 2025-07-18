@@ -5,11 +5,13 @@ type AppStoreState = {
   pushToken: string | null;
   deviceId: string | null;
   shouldShowOnboarding: boolean;
+  layout: 'user' | 'organizer';
 };
 
 type AppStoreActions = {
   setPushToken: (token: string) => void;
   setDeviceId: (deviceId: string) => void;
+  setLayout: (layout: 'user' | 'organizer') => void;
   setShowOnboarding: (shouldShow: boolean) => void;
   reset: () => void;
 };
@@ -18,6 +20,7 @@ const initialState: AppStoreState = {
   pushToken: null,
   deviceId: null,
   shouldShowOnboarding: true,
+  layout: 'user',
 };
 
 const useAppStore = create<AppStoreState & AppStoreActions>()(
@@ -25,6 +28,7 @@ const useAppStore = create<AppStoreState & AppStoreActions>()(
     set => ({
       ...initialState,
       setPushToken: pushToken => set(_ => ({pushToken})),
+      setLayout: layout => set(_ => ({layout})),
       setDeviceId: deviceId => set(_ => ({deviceId})),
       setShowOnboarding: shouldShowOnboarding =>
         set(_ => ({shouldShowOnboarding})),

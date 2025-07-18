@@ -1,4 +1,4 @@
-import {IEvent, IEventShow, IOrganization, IUser} from '../types';
+import {IEvent, IEventShow, IOrderStatus, IOrganization, IUser} from '../types';
 import dayjs from '../libs/dayjs';
 import dictionary from './translation.json';
 
@@ -43,6 +43,13 @@ const organizationRoleColors: Record<
   STAFF: 'secondary',
 };
 
+const orderStatusTexts: Record<IOrderStatus, string> = {
+  FULFILLED: 'Đã thanh toán',
+  PENDING: 'Chờ thanh toán',
+  WAITING_FOR_PAYMENT: 'Chờ thanh toán',
+  APPROVED: 'Đang xử lý',
+};
+
 const isOwner = (user: IUser, organization: IOrganization) => {
   return (
     organization.user_organizations?.find(
@@ -55,6 +62,13 @@ const priceFormat = (price: number) => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
+  }).format(price);
+};
+
+export const priceFormatV2 = (price: number, currency = 'VND') => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency,
   }).format(price);
 };
 
@@ -166,6 +180,7 @@ const isEventShowAvailable = (eventShow: IEventShow) => {
 };
 
 export {
+  orderStatusTexts,
   isEventShowAvailable,
   formatHoursAndMinutes,
   isSubsribed,

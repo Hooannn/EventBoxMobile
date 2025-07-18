@@ -131,6 +131,17 @@ export interface ICategory {
 
 export type IEventStatus = 'DRAFT' | 'ARCHIVED' | 'PUBLISHED' | 'PENDING';
 
+export interface IEventDetail {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  description: string;
+  address: string;
+  place_name: string;
+  assets: IAsset[];
+}
+
 export interface IEvent {
   id: number;
   organization: IOrganization;
@@ -168,6 +179,15 @@ export interface IEventShow {
   tickets: ITicket[];
 }
 
+export interface IEventShowDetail {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  start_time: string;
+  end_time: string;
+  event: IEventDetail;
+}
+
 export interface ITicket {
   id: number;
   created_at: string;
@@ -180,6 +200,17 @@ export interface ITicket {
   available: boolean;
   initial_stock: number;
   stock: number;
+}
+
+export interface ITicketDetail {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  name: string;
+  event_show: IEventShowDetail;
+  description?: string | null;
+  price: number;
+  assets: IAsset[];
 }
 
 export type IOrderStatus =
@@ -200,12 +231,32 @@ export interface IOrder {
   place_total: number;
 }
 
+export interface IOrderDetail {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  status: IOrderStatus;
+  payments: IPayment[];
+  place_total: number;
+}
+
 export interface ITicketItem {
+  id: number;
   created_at: string;
   updated_at: string;
   order_id: number;
   ticket_id: number;
   ticket: ITicket;
+  place_total: number;
+  traces: ITicketItemTrace[];
+}
+
+export interface ITicketItemDetail {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  ticket: ITicketDetail;
+  order: IOrderDetail;
   place_total: number;
   traces: ITicketItemTrace[];
 }
@@ -238,13 +289,13 @@ export interface IPayment {
   is_fulfilled: boolean;
   exchange_rate_source_currency?: string | null;
   exchange_rate_target_currency?: string | null;
-  exchange_rate_value?: number | null;
-  paypal_fee_value?: number | null;
+  exchange_rate?: number | null;
+  paypal_fee?: number | null;
   paypal_fee_currency?: string | null;
-  gross_amount_value?: number | null;
+  gross_amount?: number | null;
   gross_amount_currency?: string | null;
-  net_amount_value?: number | null;
+  net_amount?: number | null;
   net_amount_currency?: string | null;
-  receivable_amount?: number | null;
+  receivable?: number | null;
   receivable_amount_currency?: string | null;
 }

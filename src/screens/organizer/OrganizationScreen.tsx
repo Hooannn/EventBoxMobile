@@ -1,52 +1,54 @@
-import React, {useCallback, useState} from 'react';
-import {RefreshControl} from 'react-native';
-import useAxios from '../../hooks/useAxios';
-import {useQuery} from '@tanstack/react-query';
-import {IResponseData, ITicketItemDetail} from '../../types';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {
-  ScrollView,
-  Spinner,
-  YStack,
   Text,
-  Stack,
+  ScrollView,
+  YStack,
   XStack,
   Button,
+  Spinner,
   Input,
 } from 'tamagui';
+import {IEvent, IOrganization, IResponseData} from '../../types';
+import {RefreshControl} from 'react-native';
 import AppBar from '../../components/AppBar';
-import PagerView from 'react-native-pager-view';
-import {Filter} from '@tamagui/lucide-icons';
+import {useCallback, useState} from 'react';
+import React from 'react';
+import useAxios from '../../hooks/useAxios';
+import {useQuery} from '@tanstack/react-query';
+import {ChevronLeft, Filter} from '@tamagui/lucide-icons';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import TicketCard from './TicketCard';
-import dayjs from '../../libs/dayjs';
-import {useNavigation} from '@react-navigation/native';
-import {SCREENS} from '../../navigation';
+import PagerView from 'react-native-pager-view';
 
-export default function TicketsScreen() {
+export default function OrganizationScreen() {
+  const route = useRoute();
+  const organization = route.params as IOrganization;
   const axios = useAxios();
 
-  const getMyTicketItemsQuery = useQuery({
-    queryKey: ['fetch/tickets/items/me'],
+  const getEventsQuery = useQuery({
+    queryKey: ['fetch/event/organization/id', organization.id],
     queryFn: () =>
-      axios.get<IResponseData<ITicketItemDetail[]>>('/v1/tickets/items/me'),
+      axios.get<IResponseData<IEvent[]>>(
+        `/v1/events/public/organization/${organization.id}`,
+      ),
     refetchOnWindowFocus: false,
   });
-
-  const ticketItems = getMyTicketItemsQuery.data?.data?.data || [];
-
-  const isLoading = getMyTicketItemsQuery.isLoading;
 
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    try {
-      Promise.all([getMyTicketItemsQuery.refetch()]);
-    } catch (error) {
-    } finally {
+    getEventsQuery.refetch().finally(() => {
       setRefreshing(false);
-    }
-  }, [getMyTicketItemsQuery]);
+    });
+  }, [getEventsQuery]);
+
+  const navigation = useNavigation();
+
+  const events = getEventsQuery.data?.data?.data;
+
+  const isLoading = getEventsQuery.isLoading;
+
+  const pagerViewRef = React.useRef<PagerView>(null);
 
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -64,54 +66,25 @@ export default function TicketsScreen() {
       key: 'past',
     },
   ];
-
-  const navigation = useNavigation();
-
-  const filterTicketItems = (status: string) => {
-    return ticketItems.filter(ticketItem => {
-      const eventShow = ticketItem.ticket.event_show;
-
-      const now = dayjs();
-      const startTime = dayjs(eventShow.start_time);
-      const endTime = dayjs(eventShow.end_time);
-
-      if (status === 'upcoming') {
-        return startTime.isAfter(now);
-      } else if (status === 'ongoing') {
-        return startTime.isBefore(now) && endTime.isAfter(now);
-      } else if (status === 'past') {
-        return endTime.isBefore(now);
-      }
-      return false;
-    });
-  };
-
-  const sortedTicketItems = (status: string) => {
-    return filterTicketItems(status).sort((a, b) => {
-      const aStartTime = dayjs(a.ticket.event_show.start_time);
-      const bStartTime = dayjs(b.ticket.event_show.start_time);
-      return aStartTime.isBefore(bStartTime) ? -1 : 1;
-    });
-  };
-
-  const pagerViewRef = React.useRef<PagerView>(null);
   return (
     <KeyboardAwareScrollView
       enableOnAndroid
       contentContainerStyle={{flexGrow: 1}}>
       <YStack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <AppBar>
-          <Stack
-            paddingTop={8}
-            paddingBottom={8}
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="center"
-            flex={1}>
-            <Text color={'white'} fontWeight={700} fontSize={'$7'}>
-              Vé của tôi
+          <XStack alignItems="center" gap={8}>
+            <Button
+              backgroundColor={'transparent'}
+              variant="outlined"
+              themeInverse
+              circular
+              onPress={() => navigation.goBack()}
+              icon={<ChevronLeft size={20} />}
+            />
+            <Text fontSize={'$7'} fontWeight="bold" color={'white'}>
+              {organization.name}
             </Text>
-          </Stack>
+          </XStack>
         </AppBar>
 
         {isLoading ? (
@@ -166,7 +139,7 @@ export default function TicketsScreen() {
               initialPage={0}>
               {tabs().map((tab, index) => (
                 <>
-                  {sortedTicketItems(tab.key).length > 0 ? (
+                  {events && events.length > 0 ? (
                     <ScrollView
                       key={'ScrollView' + tab.key + index}
                       paddingTop={8}
@@ -186,7 +159,7 @@ export default function TicketsScreen() {
                         width={'100%'}
                         gap={8}
                         paddingBottom={20}>
-                        {sortedTicketItems(tab.key).map((ticketItem, i) => (
+                        {/* {sortedTicketItems(tab.key).map((ticketItem, i) => (
                           <TicketCard
                             key={'TicketCard' + i}
                             ticketItem={ticketItem}
@@ -197,7 +170,7 @@ export default function TicketsScreen() {
                               })
                             }
                           />
-                        ))}
+                        ))} */}
                       </YStack>
                     </ScrollView>
                   ) : (
@@ -207,7 +180,7 @@ export default function TicketsScreen() {
                       width={'100%'}
                       alignItems="center"
                       justifyContent="center">
-                      <Text>Không có vé nào</Text>
+                      <Text>Không có sự kiện nào</Text>
                     </YStack>
                   )}
                 </>

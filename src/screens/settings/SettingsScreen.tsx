@@ -1,6 +1,6 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {Alert, Platform} from 'react-native';
-import {Button, View} from 'tamagui';
+import {Button, Stack, Text, View, YStack} from 'tamagui';
 import useAxios from '../../hooks/useAxios';
 import {useMutation} from '@tanstack/react-query';
 import {IResponseData} from '../../types';
@@ -10,11 +10,14 @@ import useAuthStore from '../../store/auth.store';
 import useAppStore from '../../store/app.store';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import {useNavigation} from '@react-navigation/native';
+import AppBar from '../../components/AppBar';
 
 export default function SettingsScreen() {
   const axios = useAxios();
   const {toastOnError, toast} = useToast();
   const resetAuthStore = useAuthStore(state => state.reset);
+  const setLayout = useAppStore(state => state.setLayout);
+  const layout = useAppStore(state => state.layout);
   const resetAppStore = useAppStore(state => state.reset);
   const navigation = useNavigation();
 
@@ -62,32 +65,38 @@ export default function SettingsScreen() {
   return (
     <>
       {logoutMutation.isPending && <LoadingOverlay />}
-      <View flex={1} justifyContent="center" alignItems="center">
-        <Button onPress={handleLogout}>Logout</Button>
-        <Button
-          onPress={() => {
-            axios.get('/v1/events/test/notification');
-          }}>
-          test noti
-        </Button>
-        <Button
-          onPress={() => {
-            navigation.navigate('PaymentProcessing', {
-              orderId: '12345',
-            });
-          }}>
-          Socket
-        </Button>
+      <YStack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <AppBar>
+          <Stack
+            paddingTop={8}
+            paddingBottom={8}
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="center"
+            flex={1}>
+            <Text color={'white'} fontWeight={700} fontSize={'$7'}>
+              Tài khoản
+            </Text>
+          </Stack>
+        </AppBar>
 
-        <Button
-          onPress={() => {
-            navigation.navigate('PaymentSuccess', {
-              orderId: '12345',
-            });
-          }}>
-          Success
-        </Button>
-      </View>
+        <YStack
+          flex={1}
+          width={'100%'}
+          alignItems="center"
+          justifyContent="center">
+          <View flex={1} justifyContent="center" alignItems="center">
+            <Button onPress={handleLogout}>Logout</Button>
+
+            <Button
+              onPress={() => {
+                setLayout(layout === 'user' ? 'organizer' : 'user');
+              }}>
+              Switch layout (current: {layout})
+            </Button>
+          </View>
+        </YStack>
+      </YStack>
     </>
   );
 }

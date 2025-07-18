@@ -1,18 +1,12 @@
 import React from 'react';
 import {SCREENS, Stack, Tab} from '.';
-import {Home, Tickets, CircleUserRound} from '@tamagui/lucide-icons';
-import EventDetailScreen from '../screens/home/EventDetailScreen';
-import HomeScreen from '../screens/home/HomeScreen';
+import {Home, CircleUserRound} from '@tamagui/lucide-icons';
 import SettingsScreen from '../screens/settings/SettingsScreen';
-import TicketsScreen from '../screens/tickets/TicketsScreen';
-import CheckOutScreen from '../screens/home/CheckOutScreen';
-import PaymentScreen from '../screens/home/PaymentScreen';
-import PaymentProcessingScreen from '../screens/home/PaymentProcessingScreen';
-import PaymentSuccessScreen from '../screens/home/PaymentSuccess';
 import {useRoute} from '@react-navigation/native';
-import TicketItemDetailScreen from '../screens/tickets/TicketItemDetailScreen';
+import HomeScreen from '../screens/organizer/HomeScreen';
+import OrganizationScreen from '../screens/organizer/OrganizationScreen';
 
-export default function DefaultStack() {
+export default function OrganizerStack() {
   const renderTabIcon = (
     route: any,
     focused: boolean,
@@ -22,8 +16,6 @@ export default function DefaultStack() {
     switch (route.name) {
       case SCREENS.HOME:
         return <Home size={size} color={color} />;
-      case SCREENS.TICKETS:
-        return <Tickets size={size} color={color} />;
       case SCREENS.SETTINGS:
         return <CircleUserRound size={size} color={color} />;
     }
@@ -43,7 +35,6 @@ export default function DefaultStack() {
             renderTabIcon(route, focused, color, size),
         })}>
         <Tab.Screen name={SCREENS.HOME} component={HomeScreen} />
-        <Tab.Screen name={SCREENS.TICKETS} component={TicketsScreen} />
         <Tab.Screen name={SCREENS.SETTINGS} component={SettingsScreen} />
       </Tab.Navigator>
     );
@@ -51,20 +42,9 @@ export default function DefaultStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={SCREENS.TAB_NAVIGATION} component={TabNavigation} />
-      <Stack.Screen name={SCREENS.EVENT_DETAIL} component={EventDetailScreen} />
-      <Stack.Screen name={SCREENS.CHECK_OUT} component={CheckOutScreen} />
-      <Stack.Screen name={SCREENS.PAYMENT} component={PaymentScreen} />
       <Stack.Screen
-        name={SCREENS.PAYMENT_PROCESSING}
-        component={PaymentProcessingScreen}
-      />
-      <Stack.Screen
-        name={SCREENS.PAYMENT_SUCCESS}
-        component={PaymentSuccessScreen}
-      />
-      <Stack.Screen
-        name={SCREENS.TICKET_ITEM_DETAIL}
-        component={TicketItemDetailScreen}
+        name={SCREENS.ORGANIZATION}
+        component={OrganizationScreen}
       />
     </Stack.Navigator>
   );
