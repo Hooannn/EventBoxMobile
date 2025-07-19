@@ -2,9 +2,9 @@ import React from 'react';
 import {SCREENS, Stack, Tab} from '.';
 import {Home, CircleUserRound} from '@tamagui/lucide-icons';
 import SettingsScreen from '../screens/settings/SettingsScreen';
-import {useRoute} from '@react-navigation/native';
 import HomeScreen from '../screens/organizer/HomeScreen';
 import OrganizationScreen from '../screens/organizer/OrganizationScreen';
+import ScanTicketScreen from '../screens/organizer/ScanTicketScreen';
 
 export default function OrganizerStack() {
   const renderTabIcon = (
@@ -22,11 +22,8 @@ export default function OrganizerStack() {
   };
 
   const TabNavigation = () => {
-    const route = useRoute();
-    const initialTab = route.params?.initialTab || SCREENS.HOME;
     return (
       <Tab.Navigator
-        initialRouteName={initialTab}
         screenOptions={({route}) => ({
           tabBarActiveTintColor: '#121212',
           tabBarInactiveTintColor: '#757575',
@@ -46,6 +43,7 @@ export default function OrganizerStack() {
         name={SCREENS.ORGANIZATION}
         component={OrganizationScreen}
       />
+      <Stack.Screen name={SCREENS.SCAN_TICKET} component={ScanTicketScreen} />
     </Stack.Navigator>
   );
 }

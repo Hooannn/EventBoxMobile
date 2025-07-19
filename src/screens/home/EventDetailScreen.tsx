@@ -206,6 +206,7 @@ export default function EventDetailScreen() {
       `${SOCKET_URL}/event?user_id=${authUser?.id}&event_id=${eventId}`,
       {
         transports: ['websocket'],
+        forceNew: true,
         reconnection: true,
         reconnectionAttempts: 10,
         reconnectionDelay: 1000,

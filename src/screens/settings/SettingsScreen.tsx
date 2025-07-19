@@ -90,6 +90,15 @@ export default function SettingsScreen() {
 
             <Button
               onPress={() => {
+                navigation.navigate('PaymentProcessing', {
+                  orderId: 12345,
+                });
+              }}>
+              Processing
+            </Button>
+
+            <Button
+              onPress={() => {
                 setLayout(layout === 'user' ? 'organizer' : 'user');
               }}>
               Switch layout (current: {layout})

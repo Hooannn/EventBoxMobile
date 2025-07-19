@@ -81,7 +81,12 @@ export default function HomeScreen() {
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
               }>
-              <YStack flex={1} width={'100%'} paddingBottom={20} padding={'$3'}>
+              <YStack
+                gap={8}
+                flex={1}
+                width={'100%'}
+                paddingBottom={20}
+                padding={'$3'}>
                 {organizations.map(organization => (
                   <Card
                     borderRadius={0}
@@ -91,6 +96,7 @@ export default function HomeScreen() {
                     key={'Organization' + organization.id}
                     padding={12}
                     bordered
+                    animation="bouncy"
                     pressStyle={{
                       scale: 0.99,
                     }}

@@ -15,9 +15,9 @@ export default function TicketCard({
     <>
       <Card
         bordered
+        animation="bouncy"
         backgroundColor={'white'}
         height={240}
-        transition="all 0.3s ease-in-out"
         onPress={onPress}
         pressStyle={{
           transform: [{scale: 0.99}],
@@ -109,19 +109,19 @@ export default function TicketCard({
               <XStack justifyContent="space-between" gap={16}>
                 <YStack width={'50%'}>
                   <Text fontSize={'$3'}>Địa điểm</Text>
-                  <Text fontWeight={700} fontSize={'$3'}>
+                  <Text fontWeight={700} fontSize={'$2'}>
                     {ticketItem.ticket.event_show.event.place_name}
                   </Text>
                 </YStack>
                 <YStack width={'50%'}>
                   <Text fontSize={'$3'}>Thời gian diễn ra</Text>
-                  <Text fontWeight={700} fontSize={'$3'}>
+                  <Text fontWeight={700} fontSize={'$2'}>
                     Từ{' '}
                     {stringToDateFormatV2(
                       ticketItem.ticket.event_show.start_time,
                     )}
                   </Text>
-                  <Text fontWeight={700} fontSize={'$3'}>
+                  <Text fontWeight={700} fontSize={'$2'}>
                     đến{' '}
                     {stringToDateFormatV2(
                       ticketItem.ticket.event_show.end_time,
@@ -132,13 +132,13 @@ export default function TicketCard({
               <XStack justifyContent="space-between" gap={16}>
                 <YStack width={'50%'}>
                   <Text fontSize={'$3'}>Loại vé</Text>
-                  <Text fontWeight={700} fontSize={'$3'}>
+                  <Text fontWeight={700} fontSize={'$2'}>
                     {ticketItem.ticket.name}
                   </Text>
                 </YStack>
                 <YStack width={'50%'}>
                   <Text fontSize={'$3'}>Trạng thái</Text>
-                  <Text fontWeight={700} fontSize={'$3'}>
+                  <Text fontWeight={700} fontSize={'$2'}>
                     {ticketItem.traces && ticketItem.traces.length > 0
                       ? ticketItem.traces[ticketItem.traces.length - 1]
                           .event === 'CHECKED_IN'

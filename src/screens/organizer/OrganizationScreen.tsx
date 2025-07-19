@@ -8,7 +8,7 @@ import {
   Spinner,
   Input,
 } from 'tamagui';
-import {IEvent, IOrganization, IResponseData} from '../../types';
+import {IEvent, IEventShow, IOrganization, IResponseData} from '../../types';
 import {RefreshControl} from 'react-native';
 import AppBar from '../../components/AppBar';
 import {useCallback, useState} from 'react';
@@ -18,6 +18,8 @@ import {useQuery} from '@tanstack/react-query';
 import {ChevronLeft, Filter} from '@tamagui/lucide-icons';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import PagerView from 'react-native-pager-view';
+import dayjs from '../../libs/dayjs';
+import EventCardWithShows from './EventCardWithShows';
 
 export default function OrganizationScreen() {
   const route = useRoute();
@@ -25,10 +27,10 @@ export default function OrganizationScreen() {
   const axios = useAxios();
 
   const getEventsQuery = useQuery({
-    queryKey: ['fetch/event/organization/id', organization.id],
+    queryKey: ['fetch/event/organization/id/published', organization.id],
     queryFn: () =>
       axios.get<IResponseData<IEvent[]>>(
-        `/v1/events/public/organization/${organization.id}`,
+        `/v1/events/organization/${organization.id}/published`,
       ),
     refetchOnWindowFocus: false,
   });
@@ -44,7 +46,7 @@ export default function OrganizationScreen() {
 
   const navigation = useNavigation();
 
-  const events = getEventsQuery.data?.data?.data;
+  const events = getEventsQuery.data?.data?.data || [];
 
   const isLoading = getEventsQuery.isLoading;
 
@@ -66,13 +68,65 @@ export default function OrganizationScreen() {
       key: 'past',
     },
   ];
+
+  const flateredEventShows = () => {
+    return events.reduce<IEventShow[]>((acc, event) => {
+      if (event.shows) {
+        const shows = event.shows.map(show => ({
+          ...show,
+          event_id: event.id,
+        }));
+        acc.push(...shows);
+      }
+      return acc;
+    }, []);
+  };
+
+  const filterEventShows = (status: string) => {
+    const flateredShows = flateredEventShows();
+    const result = flateredShows.filter(show => {
+      const now = dayjs();
+      const startTime = dayjs(show.start_time);
+      const endTime = dayjs(show.end_time);
+      if (status === 'upcoming') {
+        return startTime.isAfter(now);
+      } else if (status === 'ongoing') {
+        return startTime.isBefore(now) && endTime.isAfter(now);
+      } else if (status === 'past') {
+        return endTime.isBefore(now);
+      }
+      return false;
+    });
+    return result;
+  };
+
+  const sortedEventShows = (status: string) => {
+    return filterEventShows(status).sort((a, b) => {
+      return dayjs(a.start_time).isBefore(dayjs(b.start_time)) ? -1 : 1;
+    });
+  };
+
+  const getEventShowsByEventId = (status: string, eventId: number) => {
+    const result = sortedEventShows(status).filter(
+      show => show.event_id === eventId,
+    );
+    return result;
+  };
+
+  const filterEvents = (status: string) => {
+    return events.filter(event => {
+      const shows = getEventShowsByEventId(status, event.id);
+      return shows.length > 0;
+    });
+  };
+
   return (
     <KeyboardAwareScrollView
       enableOnAndroid
       contentContainerStyle={{flexGrow: 1}}>
       <YStack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <AppBar>
-          <XStack alignItems="center" gap={8}>
+          <XStack alignItems="center" gap={8} width={'100%'}>
             <Button
               backgroundColor={'transparent'}
               variant="outlined"
@@ -81,7 +135,13 @@ export default function OrganizationScreen() {
               onPress={() => navigation.goBack()}
               icon={<ChevronLeft size={20} />}
             />
-            <Text fontSize={'$7'} fontWeight="bold" color={'white'}>
+            <Text
+              fontSize={'$7'}
+              fontWeight="bold"
+              color={'white'}
+              width={'88%'}
+              ellipsizeMode="tail"
+              numberOfLines={1}>
               {organization.name}
             </Text>
           </XStack>
@@ -139,7 +199,7 @@ export default function OrganizationScreen() {
               initialPage={0}>
               {tabs().map((tab, index) => (
                 <>
-                  {events && events.length > 0 ? (
+                  {filterEvents(tab.key).length > 0 ? (
                     <ScrollView
                       key={'ScrollView' + tab.key + index}
                       paddingTop={8}
@@ -159,18 +219,14 @@ export default function OrganizationScreen() {
                         width={'100%'}
                         gap={8}
                         paddingBottom={20}>
-                        {/* {sortedTicketItems(tab.key).map((ticketItem, i) => (
-                          <TicketCard
-                            key={'TicketCard' + i}
-                            ticketItem={ticketItem}
-                            onPress={() =>
-                              navigation.navigate(SCREENS.TICKET_ITEM_DETAIL, {
-                                ...ticketItem,
-                                status: tab.key,
-                              })
-                            }
+                        {filterEvents(tab.key).map((event, i) => (
+                          <EventCardWithShows
+                            status={tab.key}
+                            key={'EventCard' + i + event.id}
+                            event={event}
+                            shows={getEventShowsByEventId(tab.key, event.id)}
                           />
-                        ))} */}
+                        ))}
                       </YStack>
                     </ScrollView>
                   ) : (

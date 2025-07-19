@@ -19,6 +19,7 @@ export default function PaymentProcessingScreen() {
       {
         transports: ['websocket'],
         reconnection: true,
+        forceNew: true,
         reconnectionAttempts: 10,
         reconnectionDelay: 1000,
       },
