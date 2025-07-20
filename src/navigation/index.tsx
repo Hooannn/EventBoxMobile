@@ -33,6 +33,7 @@ export const SCREENS = {
   TICKET_ITEM_DETAIL: 'TicketItemDetail',
   ORGANIZATION: 'Organization',
   SCAN_TICKET: 'ScanTicket',
+  SCAN_TICKET_RESULT: 'ScanTicketResult',
 };
 
 const Navigation = () => {

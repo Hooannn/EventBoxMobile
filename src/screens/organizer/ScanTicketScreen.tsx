@@ -9,9 +9,12 @@ import {
   Camera,
   Code,
   useCameraDevice,
+  useCameraPermission,
   useCodeScanner,
 } from 'react-native-vision-camera';
 import {StyleSheet} from 'react-native';
+import ScannerOverlay from '../../components/ScannerOverlay';
+import {SCREENS} from '../../navigation';
 
 export default function ScanTicketScreen() {
   const route = useRoute();
@@ -19,20 +22,44 @@ export default function ScanTicketScreen() {
     event: IEvent;
     show: IEventShow;
   };
-
   const navigation = useNavigation();
   const device = useCameraDevice('back');
 
   const onCodeScanned = useCallback((codes: Code[]) => {
-    console.log(`Scanned ${codes.length} codes:`, codes);
-    const value = codes[0]?.value;
-    console.log('Scanned value:', value);
+    const qr = codes.find(code => code.type === 'qr');
+    const qrValue = qr?.value;
+    if (qrValue) {
+      navigation.navigate(SCREENS.SCAN_TICKET_RESULT, {
+        token: qrValue,
+        eventShowId: show.id,
+      });
+    }
   }, []);
 
   const codeScanner = useCodeScanner({
     codeTypes: ['qr'],
     onCodeScanned: onCodeScanned,
   });
+
+  const [scanArea, setScanArea] = React.useState({
+    width: 0,
+    height: 0,
+  });
+
+  const {hasPermission, requestPermission} = useCameraPermission();
+
+  if (!hasPermission) {
+    requestPermission();
+    return (
+      <YStack flex={1} justifyContent="center" alignItems="center">
+        <Text>No camera permission granted</Text>
+        <Button onPress={() => requestPermission()} marginTop={16}>
+          Grant Permission
+        </Button>
+      </YStack>
+    );
+  }
+
   return (
     <YStack flex={1} justifyContent="center" alignItems="center">
       <AppBar>
@@ -76,17 +103,27 @@ export default function ScanTicketScreen() {
       </AppBar>
 
       <YStack
+        onLayout={e => {
+          const {width, height} = e.nativeEvent.layout;
+          setScanArea({width, height});
+        }}
         flex={1}
         width={'100%'}
         alignItems="center"
         justifyContent="center">
         {device ? (
-          <Camera
-            style={StyleSheet.absoluteFill}
-            device={device}
-            codeScanner={codeScanner}
-            isActive={true}
-          />
+          <>
+            <Camera
+              style={StyleSheet.absoluteFill}
+              device={device}
+              codeScanner={codeScanner}
+              isActive={true}
+            />
+            <ScannerOverlay
+              parentWidth={scanArea.width}
+              parentHeight={scanArea.height}
+            />
+          </>
         ) : (
           <Stack>
             <Text>No camera available</Text>

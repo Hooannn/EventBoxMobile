@@ -5,6 +5,7 @@ import SettingsScreen from '../screens/settings/SettingsScreen';
 import HomeScreen from '../screens/organizer/HomeScreen';
 import OrganizationScreen from '../screens/organizer/OrganizationScreen';
 import ScanTicketScreen from '../screens/organizer/ScanTicketScreen';
+import ScanTicketResultScreen from '../screens/organizer/ScanTicketResultScreen';
 
 export default function OrganizerStack() {
   const renderTabIcon = (
@@ -44,6 +45,10 @@ export default function OrganizerStack() {
         component={OrganizationScreen}
       />
       <Stack.Screen name={SCREENS.SCAN_TICKET} component={ScanTicketScreen} />
+      <Stack.Screen
+        name={SCREENS.SCAN_TICKET_RESULT}
+        component={ScanTicketResultScreen}
+      />
     </Stack.Navigator>
   );
 }

@@ -18,7 +18,6 @@ export default function SettingsScreen() {
   const resetAuthStore = useAuthStore(state => state.reset);
   const setLayout = useAppStore(state => state.setLayout);
   const layout = useAppStore(state => state.layout);
-  const resetAppStore = useAppStore(state => state.reset);
   const navigation = useNavigation();
 
   const logoutMutation = useMutation({
@@ -40,7 +39,6 @@ export default function SettingsScreen() {
   const logout = async () => {
     logoutMutation.mutateAsync().finally(() => {
       resetAuthStore();
-      resetAppStore();
     });
   };
 

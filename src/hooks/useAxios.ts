@@ -28,7 +28,6 @@ export const rawAxios = axios.create({
 const useAxios = () => {
   const toast = useToastController();
   const resetAuthStore = useAuthStore(state => state.reset);
-  const resetAppStore = useAppStore(state => state.reset);
   const deviceId = useAppStore(state => state.deviceId);
   const setDeviceId = useAppStore(state => state.setDeviceId);
   const accessToken = useAuthStore(state => state.accessToken);
@@ -44,7 +43,6 @@ const useAxios = () => {
       },
     });
     resetAuthStore();
-    resetAppStore();
   };
 
   useEffect(() => {

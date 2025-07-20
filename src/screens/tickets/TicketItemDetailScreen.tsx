@@ -24,32 +24,49 @@ import {
   stringToDateFormatV2,
 } from '../../utils';
 import QRCode from 'react-native-qrcode-svg';
-import useAxios from '../../hooks/useAxios';
+import useAxios, {SOCKET_URL} from '../../hooks/useAxios';
 import {useQuery} from '@tanstack/react-query';
 import {jwtDecode} from 'jwt-decode';
 import dayjs from '../../libs/dayjs';
+import {io} from 'socket.io-client';
+import useAuthStore from '../../store/auth.store';
+import {Alert} from 'react-native';
 export default function TicketItemDetailScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const axios = useAxios();
-  const ticketItem = route.params as ITicketItemDetail & {
+  const authUser = useAuthStore(state => state.user);
+  const initTicketItem = route.params as ITicketItemDetail & {
     status: 'ongoing' | 'upcoming' | 'past';
   };
+
+  const [ticketItem, setTicketItem] =
+    useState<ITicketItemDetail>(initTicketItem);
+
+  const getTicketItemDetailQuery = useQuery({
+    queryKey: ['fetch/tickets/items/detail/id', ticketItem.id],
+    queryFn: () =>
+      axios.get<IResponseData<ITicketItemDetail>>(
+        `/v1/tickets/items/${ticketItem.id}`,
+      ),
+    refetchOnWindowFocus: false,
+    enabled: false,
+  });
 
   const getQrCodeQuery = useQuery({
     queryKey: [
       'fetch/tickets/items/id/qrcode',
       ticketItem.id,
-      ticketItem.status,
+      initTicketItem.status,
     ],
     queryFn: () =>
-      ticketItem.status === 'ongoing'
+      initTicketItem.status === 'ongoing'
         ? axios.get<IResponseData<string>>(
             `/v1/tickets/items/${ticketItem.id}/qrcode`,
           )
         : null,
     refetchOnWindowFocus: false,
-    enabled: ticketItem.status === 'ongoing',
+    enabled: initTicketItem.status === 'ongoing',
   });
 
   const [expiration, setExpiration] = useState(0);
@@ -93,6 +110,55 @@ export default function TicketItemDetailScreen() {
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [expiration]);
+
+  useEffect(() => {
+    const socket = io(
+      `${SOCKET_URL}/ticket?user_id=${authUser?.id}&ticket_item_id=${ticketItem.id}`,
+      {
+        transports: ['websocket'],
+        forceNew: true,
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+      },
+    );
+
+    socket.on('connect', () => {
+      console.log('✅ Connected:', socket.id);
+    });
+
+    socket.on('traces_updated', e => {
+      getTicketItemDetailQuery.refetch().then(res => {
+        if (res.data?.data?.data) {
+          setTicketItem(res.data.data.data);
+        }
+      });
+
+      Alert.alert('Thông báo', 'Vé của bạn vừa được cập nhật trạng thái', [
+        {
+          text: 'OK',
+          onPress: () => {},
+        },
+      ]);
+    });
+
+    socket.on('disconnect', reason => {
+      console.log('❌ Disconnected:', reason);
+    });
+
+    socket.on('connect_error', error => {
+      console.log('❌ Connect Error:', error);
+    });
+
+    socket.on('reconnect_attempt', attempt => {
+      console.log(`🔁 Reconnecting... (${attempt})`);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <YStack
@@ -201,14 +267,13 @@ export default function TicketItemDetailScreen() {
                   />
                 ))}
               </View>
-              <Stack height={'50%'} alignItems="center" justifyContent="center">
-                <YStack
-                  flex={1}
-                  width={'100%'}
-                  justifyContent="center"
-                  gap={8}
-                  paddingHorizontal={24}
-                  paddingVertical={24}>
+              <Stack
+                height={'50%'}
+                paddingVertical={24}
+                paddingHorizontal={24}
+                alignItems="center"
+                justifyContent="center">
+                <YStack flex={1} width={'100%'} justifyContent="center" gap={8}>
                   <XStack justifyContent="space-between" gap={16}>
                     <YStack width={'50%'}>
                       <Text fontSize={'$3'}>Địa điểm</Text>
@@ -266,7 +331,7 @@ export default function TicketItemDetailScreen() {
                           <>
                             <Ticket size={100} color={'lightgray'} />
                             <Text fontSize={'$3'} color={'gray'}>
-                              {ticketItem.status === 'past'
+                              {initTicketItem.status === 'past'
                                 ? 'Chương trình đã kết thúc.'
                                 : 'Chương trình chưa bắt đầu. Vui lòng quay lại sau.'}
                             </Text>

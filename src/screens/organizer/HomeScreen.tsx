@@ -117,7 +117,7 @@ export default function HomeScreen() {
                         <Text fontSize={'$5'} fontWeight="bold">
                           {organization.name}
                         </Text>
-                        <Paragraph fontSize={'$3'}>
+                        <Paragraph fontSize={'$3'} lineHeight={20}>
                           {organization.description}
                         </Paragraph>
                       </YStack>

@@ -16,6 +16,9 @@ import Navigation from './src/navigation';
 import {TamaguiProvider} from '@tamagui/core';
 import {PortalProvider, YStack} from 'tamagui';
 import FirebaseMessagingProvider from './src/context/FirebaseMessagingProvider';
+import {LogBox, StatusBar} from 'react-native';
+
+LogBox.ignoreAllLogs();
 const queryClient = new QueryClient();
 
 const SafeAreaProviderWrapper = () => {
@@ -41,6 +44,11 @@ const App = () => {
               left={left}
             />
             <QueryClientProvider client={queryClient}>
+              <StatusBar
+                translucent
+                backgroundColor="transparent"
+                barStyle="light-content"
+              />
               <Navigation />
             </QueryClientProvider>
           </ToastProvider>

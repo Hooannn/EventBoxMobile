@@ -23,6 +23,7 @@
     "@react-navigation/bottom-tabs": "^7.3.12",
     "@react-navigation/native": "^7.1.8",
     "@react-navigation/stack": "^7.3.1",
+    "@shopify/react-native-skia": "^2.1.1",
     "@tamagui/config": "^1.130.8",
     "@tamagui/lucide-icons": "^1.130.8",
     "@tamagui/toast": "^1.130.8",
