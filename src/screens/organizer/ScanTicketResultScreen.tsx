@@ -29,7 +29,7 @@ export default function ScanTicketResultScreen() {
   const insets = useSafeAreaInsets();
   const axios = useAxios();
   const route = useRoute();
-  const {toast, toastOnError} = useToast();
+  const {toast} = useToast();
   const {token, eventShowId} = route.params as {
     token: string;
     eventShowId: number;
@@ -41,7 +41,16 @@ export default function ScanTicketResultScreen() {
         token: params.token,
         event_show_id: params.eventShowId,
       }),
-    onError: toastOnError,
+    onError: () => {
+      toast?.show('Có lỗi xảy ra!', {
+        message: 'Không thể thực hiện thao tác này. Vui lòng thử lại sau.',
+        native: false,
+        customData: {
+          theme: 'red',
+        },
+      });
+      navigation.goBack();
+    },
     onSuccess: res => {
       toast.show('Thành công!', {
         message: getMessage(res.data.message) ?? 'Thao tác thành công',
