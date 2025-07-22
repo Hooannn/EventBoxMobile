@@ -11,6 +11,7 @@ import PaymentProcessingScreen from '../screens/home/PaymentProcessingScreen';
 import PaymentSuccessScreen from '../screens/home/PaymentSuccess';
 import {useRoute} from '@react-navigation/native';
 import TicketItemDetailScreen from '../screens/tickets/TicketItemDetailScreen';
+import SearchScreen from '../screens/home/SearchScreen';
 
 export default function DefaultStack() {
   const renderTabIcon = (
@@ -51,6 +52,7 @@ export default function DefaultStack() {
   return (
     <Stack.Navigator screenOptions={{headerShown: false}}>
       <Stack.Screen name={SCREENS.TAB_NAVIGATION} component={TabNavigation} />
+      <Stack.Screen name={SCREENS.SEARCH} component={SearchScreen} />
       <Stack.Screen name={SCREENS.EVENT_DETAIL} component={EventDetailScreen} />
       <Stack.Screen name={SCREENS.CHECK_OUT} component={CheckOutScreen} />
       <Stack.Screen name={SCREENS.PAYMENT} component={PaymentScreen} />

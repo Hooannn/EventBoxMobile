@@ -9,6 +9,7 @@ import EventCard from './EventCard';
 export default function CategorySection(props: {
   category: ICategory;
   onPress: (event: IEvent) => void;
+  onSeeAllPress: () => void;
 }) {
   const axios = useAxios();
 
@@ -31,6 +32,7 @@ export default function CategorySection(props: {
         </Text>
         <Button
           opacity={0.8}
+          onPress={props.onSeeAllPress}
           backgroundColor={'transparent'}
           size="$3"
           iconAfter={<ChevronRight size={16} />}>

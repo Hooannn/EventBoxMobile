@@ -34,6 +34,7 @@ export const SCREENS = {
   ORGANIZATION: 'Organization',
   SCAN_TICKET: 'ScanTicket',
   SCAN_TICKET_RESULT: 'ScanTicketResult',
+  SEARCH: 'Search',
 };
 
 const Navigation = () => {

@@ -127,7 +127,7 @@ export default function TicketItemDetailScreen() {
       console.log('✅ Connected:', socket.id);
     });
 
-    socket.on('traces_updated', e => {
+    socket.on('traces_updated', _e => {
       getTicketItemDetailQuery.refetch().then(res => {
         if (res.data?.data?.data) {
           setTicketItem(res.data.data.data);

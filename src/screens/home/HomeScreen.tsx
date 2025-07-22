@@ -93,6 +93,9 @@ export default function HomeScreen() {
         <Button
           backgroundColor={'transparent'}
           theme={'accent'}
+          onPress={() => {
+            navigation.navigate(SCREENS.SEARCH);
+          }}
           circular
           icon={<Search size={24} />}></Button>
       </AppBar>
@@ -178,7 +181,7 @@ export default function HomeScreen() {
               {latestEvents.length > 0 && (
                 <YStack gap={5}>
                   <Text fontSize={'$5'} fontWeight={'700'}>
-                    Chuẩn bị diễn ra
+                    Mới phát hành
                   </Text>
                   <FlatList
                     data={latestEvents}
@@ -209,6 +212,11 @@ export default function HomeScreen() {
                   {featuredCategories.map(category => (
                     <CategorySection
                       onPress={onEventCardPress}
+                      onSeeAllPress={() => {
+                        navigation.navigate(SCREENS.SEARCH, {
+                          initCategoryId: category.id,
+                        });
+                      }}
                       key={'FeaturedCategory' + category.id}
                       category={category}
                     />
@@ -226,7 +234,7 @@ export default function HomeScreen() {
                 source={{
                   width: 100,
                   height: 100,
-                  uri: require('../../assets/explore_v2.png'),
+                  uri: require('../../assets/undraw_search.png'),
                 }}
               />
               <Text>Vẫn chưa tìm thấy sự kiện nào phù hợp? </Text>
@@ -237,8 +245,7 @@ export default function HomeScreen() {
                 marginHorizontal={'auto'}
                 iconAfter={<ArrowRightToLine />}
                 onPress={() => {
-                  // Handle "Xem tất cả" button press
-                  console.log('Xem tất cả pressed');
+                  navigation.navigate(SCREENS.SEARCH);
                 }}>
                 Khám phá thêm sự kiện và thể loại khác
               </Button>

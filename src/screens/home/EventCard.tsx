@@ -15,17 +15,19 @@ export default function EventCard(props: {
   showOverview: boolean;
 }) {
   return (
-    <YStack flex={1} gap={4}>
+    <YStack
+      flex={1}
+      gap={4}
+      backgroundColor={'white'}
+      borderRadius={'$3'}
+      onPress={() => props.onPress(props.event)}>
       <Card
         borderRadius={props.showOverview ? '$3' : 0}
         bordered={false}
         animation="bouncy"
         elevation={0}
         elevate={false}
-        hoverStyle={{scale: 0.98}}
-        pressStyle={{scale: 0.98}}
         flex={1}
-        onPress={() => props.onPress(props.event)}
         justifyContent="center">
         <Card.Background>
           <Image
@@ -40,7 +42,7 @@ export default function EventCard(props: {
         </Card.Background>
       </Card>
       {props.showOverview && (
-        <YStack width={'100%'}>
+        <YStack width={'100%'} padding={'$2'}>
           <Text height={38} fontWeight={700} fontSize={'$3'}>
             {props.event.title}
           </Text>
