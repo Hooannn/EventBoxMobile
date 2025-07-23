@@ -105,8 +105,8 @@ export default function HomeScreen() {
                       <Image
                         source={{
                           uri:
-                            getOrganizationLogo(organization) ||
-                            'https://via.placeholder.com/150',
+                            getOrganizationLogo(organization) ??
+                            require('../../assets/placeholder.png'),
                         }}
                         width={75}
                         height={75}

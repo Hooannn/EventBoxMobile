@@ -6,6 +6,8 @@ import HomeScreen from '../screens/organizer/HomeScreen';
 import OrganizationScreen from '../screens/organizer/OrganizationScreen';
 import ScanTicketScreen from '../screens/organizer/ScanTicketScreen';
 import ScanTicketResultScreen from '../screens/organizer/ScanTicketResultScreen';
+import ChangePasswordScreen from '../screens/settings/ChangePasswordScreen';
+import UpdateUserInfoScreen from '../screens/settings/UpdateUserInfoScreen';
 
 export default function OrganizerStack() {
   const renderTabIcon = (
@@ -48,6 +50,14 @@ export default function OrganizerStack() {
       <Stack.Screen
         name={SCREENS.SCAN_TICKET_RESULT}
         component={ScanTicketResultScreen}
+      />
+      <Stack.Screen
+        name={SCREENS.CHANGE_PASSWORD}
+        component={ChangePasswordScreen}
+      />
+      <Stack.Screen
+        name={SCREENS.UPDATE_USER_INFO}
+        component={UpdateUserInfoScreen}
       />
     </Stack.Navigator>
   );

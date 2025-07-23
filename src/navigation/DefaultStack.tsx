@@ -12,6 +12,8 @@ import PaymentSuccessScreen from '../screens/home/PaymentSuccess';
 import {useRoute} from '@react-navigation/native';
 import TicketItemDetailScreen from '../screens/tickets/TicketItemDetailScreen';
 import SearchScreen from '../screens/home/SearchScreen';
+import ChangePasswordScreen from '../screens/settings/ChangePasswordScreen';
+import UpdateUserInfoScreen from '../screens/settings/UpdateUserInfoScreen';
 
 export default function DefaultStack() {
   const renderTabIcon = (
@@ -67,6 +69,14 @@ export default function DefaultStack() {
       <Stack.Screen
         name={SCREENS.TICKET_ITEM_DETAIL}
         component={TicketItemDetailScreen}
+      />
+      <Stack.Screen
+        name={SCREENS.CHANGE_PASSWORD}
+        component={ChangePasswordScreen}
+      />
+      <Stack.Screen
+        name={SCREENS.UPDATE_USER_INFO}
+        component={UpdateUserInfoScreen}
       />
     </Stack.Navigator>
   );

@@ -35,6 +35,8 @@ export const SCREENS = {
   SCAN_TICKET: 'ScanTicket',
   SCAN_TICKET_RESULT: 'ScanTicketResult',
   SEARCH: 'Search',
+  CHANGE_PASSWORD: 'ChangePassword',
+  UPDATE_USER_INFO: 'UpdateUserInfo',
 };
 
 const Navigation = () => {
