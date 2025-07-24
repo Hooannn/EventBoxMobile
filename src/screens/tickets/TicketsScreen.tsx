@@ -11,12 +11,9 @@ import {
   Stack,
   XStack,
   Button,
-  Input,
 } from 'tamagui';
 import AppBar from '../../components/AppBar';
 import PagerView from 'react-native-pager-view';
-import {Filter} from '@tamagui/lucide-icons';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import TicketCard from './TicketCard';
 import dayjs from '../../libs/dayjs';
 import {useNavigation} from '@react-navigation/native';
@@ -96,126 +93,107 @@ export default function TicketsScreen() {
 
   const pagerViewRef = React.useRef<PagerView>(null);
   return (
-    <KeyboardAwareScrollView
-      enableOnAndroid
-      contentContainerStyle={{flexGrow: 1}}>
-      <YStack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <AppBar>
-          <Stack
-            paddingTop={8}
-            paddingBottom={8}
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="center"
-            flex={1}>
-            <Text color={'white'} fontWeight={700} fontSize={'$7'}>
-              Vé của tôi
-            </Text>
-          </Stack>
-        </AppBar>
+    <YStack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <AppBar>
+        <Stack
+          paddingTop={8}
+          paddingBottom={8}
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="center"
+          flex={1}>
+          <Text color={'white'} fontWeight={700} fontSize={'$7'}>
+            Vé của tôi
+          </Text>
+        </Stack>
+      </AppBar>
 
-        {isLoading ? (
-          <YStack
-            flex={1}
+      {isLoading ? (
+        <YStack
+          flex={1}
+          width={'100%'}
+          alignItems="center"
+          justifyContent="center">
+          <Spinner size="large" />
+        </YStack>
+      ) : (
+        <>
+          <XStack
             width={'100%'}
             alignItems="center"
-            justifyContent="center">
-            <Spinner size="large" />
-          </YStack>
-        ) : (
-          <>
-            <XStack
-              width={'100%'}
-              alignItems="center"
-              paddingTop={8}
-              paddingBottom={4}
-              paddingHorizontal={16}
-              gap={4}
-              justifyContent="space-between">
-              <Input height={50} flex={1} placeholder="Tìm kiếm..." />
-              <Button height={50} icon={Filter} />
-            </XStack>
-            <XStack
-              width={'100%'}
-              alignItems="center"
-              paddingVertical={4}
-              paddingHorizontal={16}
-              justifyContent="space-between">
-              {tabs().map((tab, index) => (
-                <Button
-                  key={'Tab' + tab.key}
-                  width={'33%'}
-                  theme={tabIndex === index ? 'accent' : 'default'}
-                  onPress={() => {
-                    setTabIndex(index);
-                    pagerViewRef.current?.setPage(index);
-                  }}>
-                  <Text>{tab.title}</Text>
-                </Button>
-              ))}
-            </XStack>
-            <PagerView
-              ref={pagerViewRef}
-              style={{
-                flex: 1,
-                width: '100%',
-              }}
-              onPageSelected={e => {
-                setTabIndex(e.nativeEvent.position);
-              }}
-              initialPage={0}>
-              {tabs().map((tab, index) => (
-                <>
-                  {sortedTicketItems(tab.key).length > 0 ? (
-                    <ScrollView
-                      key={'ScrollView' + tab.key + index}
-                      paddingTop={8}
-                      paddingHorizontal={16}
-                      showsHorizontalScrollIndicator={false}
-                      showsVerticalScrollIndicator={false}
-                      flexGrow={1}
-                      width={'100%'}
-                      refreshControl={
-                        <RefreshControl
-                          refreshing={refreshing}
-                          onRefresh={onRefresh}
+            paddingVertical={4}
+            paddingHorizontal={16}
+            justifyContent="space-between">
+            {tabs().map((tab, index) => (
+              <Button
+                key={'Tab' + tab.key}
+                width={'33%'}
+                theme={tabIndex === index ? 'accent' : 'default'}
+                onPress={() => {
+                  setTabIndex(index);
+                  pagerViewRef.current?.setPage(index);
+                }}>
+                <Text>{tab.title}</Text>
+              </Button>
+            ))}
+          </XStack>
+          <PagerView
+            ref={pagerViewRef}
+            style={{
+              flex: 1,
+              width: '100%',
+            }}
+            onPageSelected={e => {
+              setTabIndex(e.nativeEvent.position);
+            }}
+            initialPage={0}>
+            {tabs().map((tab, index) => (
+              <>
+                {sortedTicketItems(tab.key).length > 0 ? (
+                  <ScrollView
+                    key={'ScrollView' + tab.key + index}
+                    paddingTop={8}
+                    paddingHorizontal={16}
+                    showsHorizontalScrollIndicator={false}
+                    showsVerticalScrollIndicator={false}
+                    flexGrow={1}
+                    width={'100%'}
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                      />
+                    }>
+                    <YStack flex={1} width={'100%'} gap={8} paddingBottom={20}>
+                      {sortedTicketItems(tab.key).map((ticketItem, i) => (
+                        <TicketCard
+                          key={'TicketCard' + i}
+                          ticketItem={ticketItem}
+                          onPress={() =>
+                            navigation.navigate(SCREENS.TICKET_ITEM_DETAIL, {
+                              ...ticketItem,
+                              status: tab.key,
+                            })
+                          }
                         />
-                      }>
-                      <YStack
-                        flex={1}
-                        width={'100%'}
-                        gap={8}
-                        paddingBottom={20}>
-                        {sortedTicketItems(tab.key).map((ticketItem, i) => (
-                          <TicketCard
-                            key={'TicketCard' + i}
-                            ticketItem={ticketItem}
-                            onPress={() =>
-                              navigation.navigate(SCREENS.TICKET_ITEM_DETAIL, {
-                                ...ticketItem,
-                                status: tab.key,
-                              })
-                            }
-                          />
-                        ))}
-                      </YStack>
-                    </ScrollView>
-                  ) : (
-                    <YStack
-                      key={'ScrollView' + tab.key + index}
-                      flex={1}
-                      width={'100%'}
-                      alignItems="center"
-                      justifyContent="center">
-                      <Text>Không có vé nào</Text>
+                      ))}
                     </YStack>
-                  )}
-                </>
-              ))}
-            </PagerView>
-          </>
-        )}
-      </YStack>
-    </KeyboardAwareScrollView>
+                  </ScrollView>
+                ) : (
+                  <YStack
+                    key={'ScrollView' + tab.key + index}
+                    flex={1}
+                    width={'100%'}
+                    alignItems="center"
+                    justifyContent="center">
+                    <Text>Không có vé nào</Text>
+                  </YStack>
+                )}
+              </>
+            ))}
+          </PagerView>
+        </>
+      )}
+    </YStack>
   );
 }

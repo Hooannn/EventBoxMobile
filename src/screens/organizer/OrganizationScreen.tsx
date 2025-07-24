@@ -1,13 +1,5 @@
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {
-  Text,
-  ScrollView,
-  YStack,
-  XStack,
-  Button,
-  Spinner,
-  Input,
-} from 'tamagui';
+import {Text, ScrollView, YStack, XStack, Button, Spinner} from 'tamagui';
 import {IEvent, IEventShow, IOrganization, IResponseData} from '../../types';
 import {RefreshControl} from 'react-native';
 import AppBar from '../../components/AppBar';
@@ -15,8 +7,7 @@ import {useCallback, useState} from 'react';
 import React from 'react';
 import useAxios from '../../hooks/useAxios';
 import {useQuery} from '@tanstack/react-query';
-import {ChevronLeft, Filter} from '@tamagui/lucide-icons';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {ChevronLeft} from '@tamagui/lucide-icons';
 import PagerView from 'react-native-pager-view';
 import dayjs from '../../libs/dayjs';
 import EventCardWithShows from './EventCardWithShows';
@@ -121,130 +112,111 @@ export default function OrganizationScreen() {
   };
 
   return (
-    <KeyboardAwareScrollView
-      enableOnAndroid
-      contentContainerStyle={{flexGrow: 1}}>
-      <YStack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <AppBar>
-          <XStack alignItems="center" gap={8} width={'100%'}>
-            <Button
-              backgroundColor={'transparent'}
-              variant="outlined"
-              themeInverse
-              circular
-              onPress={() => navigation.goBack()}
-              icon={<ChevronLeft size={20} />}
-            />
-            <Text
-              fontSize={'$7'}
-              fontWeight="bold"
-              color={'white'}
-              width={'88%'}
-              ellipsizeMode="tail"
-              numberOfLines={1}>
-              {organization.name}
-            </Text>
-          </XStack>
-        </AppBar>
+    <YStack style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <AppBar>
+        <XStack alignItems="center" gap={8} width={'100%'}>
+          <Button
+            backgroundColor={'transparent'}
+            variant="outlined"
+            themeInverse
+            circular
+            onPress={() => navigation.goBack()}
+            icon={<ChevronLeft size={20} />}
+          />
+          <Text
+            fontSize={'$7'}
+            fontWeight="bold"
+            color={'white'}
+            width={'88%'}
+            ellipsizeMode="tail"
+            numberOfLines={1}>
+            {organization.name}
+          </Text>
+        </XStack>
+      </AppBar>
 
-        {isLoading ? (
-          <YStack
-            flex={1}
+      {isLoading ? (
+        <YStack
+          flex={1}
+          width={'100%'}
+          alignItems="center"
+          justifyContent="center">
+          <Spinner size="large" />
+        </YStack>
+      ) : (
+        <>
+          <XStack
             width={'100%'}
             alignItems="center"
-            justifyContent="center">
-            <Spinner size="large" />
-          </YStack>
-        ) : (
-          <>
-            <XStack
-              width={'100%'}
-              alignItems="center"
-              paddingTop={8}
-              paddingBottom={4}
-              paddingHorizontal={16}
-              gap={4}
-              justifyContent="space-between">
-              <Input height={50} flex={1} placeholder="Tìm kiếm..." />
-              <Button height={50} icon={Filter} />
-            </XStack>
-            <XStack
-              width={'100%'}
-              alignItems="center"
-              paddingVertical={4}
-              paddingHorizontal={16}
-              justifyContent="space-between">
-              {tabs().map((tab, index) => (
-                <Button
-                  key={'Tab' + tab.key}
-                  width={'33%'}
-                  theme={tabIndex === index ? 'accent' : 'default'}
-                  onPress={() => {
-                    setTabIndex(index);
-                    pagerViewRef.current?.setPage(index);
-                  }}>
-                  <Text>{tab.title}</Text>
-                </Button>
-              ))}
-            </XStack>
-            <PagerView
-              ref={pagerViewRef}
-              style={{
-                flex: 1,
-                width: '100%',
-              }}
-              onPageSelected={e => {
-                setTabIndex(e.nativeEvent.position);
-              }}
-              initialPage={0}>
-              {tabs().map((tab, index) => (
-                <>
-                  {filterEvents(tab.key).length > 0 ? (
-                    <ScrollView
-                      key={'ScrollView' + tab.key + index}
-                      paddingTop={8}
-                      paddingHorizontal={16}
-                      showsHorizontalScrollIndicator={false}
-                      showsVerticalScrollIndicator={false}
-                      flexGrow={1}
-                      width={'100%'}
-                      refreshControl={
-                        <RefreshControl
-                          refreshing={refreshing}
-                          onRefresh={onRefresh}
+            paddingVertical={4}
+            paddingHorizontal={16}
+            justifyContent="space-between">
+            {tabs().map((tab, index) => (
+              <Button
+                key={'Tab' + tab.key}
+                width={'33%'}
+                theme={tabIndex === index ? 'accent' : 'default'}
+                onPress={() => {
+                  setTabIndex(index);
+                  pagerViewRef.current?.setPage(index);
+                }}>
+                <Text>{tab.title}</Text>
+              </Button>
+            ))}
+          </XStack>
+          <PagerView
+            ref={pagerViewRef}
+            style={{
+              flex: 1,
+              width: '100%',
+            }}
+            onPageSelected={e => {
+              setTabIndex(e.nativeEvent.position);
+            }}
+            initialPage={0}>
+            {tabs().map((tab, index) => (
+              <>
+                {filterEvents(tab.key).length > 0 ? (
+                  <ScrollView
+                    key={'ScrollView' + tab.key + index}
+                    paddingTop={8}
+                    paddingHorizontal={16}
+                    showsHorizontalScrollIndicator={false}
+                    showsVerticalScrollIndicator={false}
+                    flexGrow={1}
+                    width={'100%'}
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                      />
+                    }>
+                    <YStack flex={1} width={'100%'} gap={8} paddingBottom={20}>
+                      {filterEvents(tab.key).map((event, i) => (
+                        <EventCardWithShows
+                          status={tab.key}
+                          key={'EventCard' + i + event.id}
+                          event={event}
+                          shows={getEventShowsByEventId(tab.key, event.id)}
                         />
-                      }>
-                      <YStack
-                        flex={1}
-                        width={'100%'}
-                        gap={8}
-                        paddingBottom={20}>
-                        {filterEvents(tab.key).map((event, i) => (
-                          <EventCardWithShows
-                            status={tab.key}
-                            key={'EventCard' + i + event.id}
-                            event={event}
-                            shows={getEventShowsByEventId(tab.key, event.id)}
-                          />
-                        ))}
-                      </YStack>
-                    </ScrollView>
-                  ) : (
-                    <YStack
-                      key={'ScrollView' + tab.key + index}
-                      flex={1}
-                      width={'100%'}
-                      alignItems="center"
-                      justifyContent="center">
-                      <Text>Không có sự kiện nào</Text>
+                      ))}
                     </YStack>
-                  )}
-                </>
-              ))}
-            </PagerView>
-          </>
-        )}
-      </YStack>
-    </KeyboardAwareScrollView>
+                  </ScrollView>
+                ) : (
+                  <YStack
+                    key={'ScrollView' + tab.key + index}
+                    flex={1}
+                    width={'100%'}
+                    alignItems="center"
+                    justifyContent="center">
+                    <Text>Không có sự kiện nào</Text>
+                  </YStack>
+                )}
+              </>
+            ))}
+          </PagerView>
+        </>
+      )}
+    </YStack>
   );
 }
