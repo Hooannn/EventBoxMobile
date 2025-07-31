@@ -17,6 +17,13 @@ import {TamaguiProvider} from '@tamagui/core';
 import {PortalProvider, YStack} from 'tamagui';
 import FirebaseMessagingProvider from './src/context/FirebaseMessagingProvider';
 import {LogBox, StatusBar} from 'react-native';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  webClientId:
+    '946931472697-h23ehp7m7abccmeigh99k0vo0fiuf70c.apps.googleusercontent.com',
+  offlineAccess: true,
+});
 
 LogBox.ignoreAllLogs();
 const queryClient = new QueryClient();

@@ -14,6 +14,12 @@ import {getMessage} from '../../utils';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import {SCREENS} from '../../navigation';
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 type LoginInputs = {
   email: string;
   password: string;
@@ -72,6 +78,35 @@ export default function LoginScreen() {
 
   const onSubmit: SubmitHandler<LoginInputs> = data => {
     signInMutation.mutate(data);
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+      if (isSuccessResponse(response)) {
+        console.log('Google Sign-In response:', response);
+      } else {
+        console.error('Google Sign-In failed:', response);
+      }
+    } catch (error) {
+      console.error('Google Sign-In error:', error);
+      if (isErrorWithCode(error)) {
+        console.error('Error code:', error.code);
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            // operation (eg. sign in) already in progress
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            // Android only, play services not available or outdated
+            break;
+          default:
+          // some other error happened
+        }
+      } else {
+        // an error that's not related to google sign in occurred
+      }
+    }
   };
 
   return (
@@ -196,7 +231,7 @@ export default function LoginScreen() {
                 }
                 borderRadius={0}
                 height={54}
-                onPress={() => toast.show('Đăng nhập thành công!')}>
+                onPress={signInWithGoogle}>
                 Tiếp tục với Google
               </Button>
               <Button
