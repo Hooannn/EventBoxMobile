@@ -643,5 +643,6 @@
   "ticket_out_of_stock": "Vé đã hết",
   "order_not_found": "Không tìm thấy đơn hàng",
   "ticket_sale_not_started": "Chưa đến thời gian bán vé",
-  "ticket_sale_ended": "Đã hết thời gian bán vé"
+  "ticket_sale_ended": "Đã hết thời gian bán vé",
+  "show_not_ended": "Chương trình chưa kết thúc"
 }

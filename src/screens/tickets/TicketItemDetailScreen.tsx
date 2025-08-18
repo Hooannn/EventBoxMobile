@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   Image,
+  Paragraph,
   ScrollView,
   Separator,
   Spinner,
@@ -31,8 +32,11 @@ import dayjs from '../../libs/dayjs';
 import {io} from 'socket.io-client';
 import useAuthStore from '../../store/auth.store';
 import {Alert} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {SCREENS} from '../../navigation';
 export default function TicketItemDetailScreen() {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
   const route = useRoute();
   const axios = useAxios();
   const authUser = useAuthStore(state => state.user);
@@ -434,8 +438,48 @@ export default function TicketItemDetailScreen() {
               )}
             </YStack>
           </Card>
+
+          {initTicketItem.feedback && (
+            <Card bordered backgroundColor={'white'} padding={16} gap={12}>
+              <Text fontSize={'$6'} fontWeight={'700'}>
+                Phản hồi của bạn
+              </Text>
+              <Separator />
+              <YStack>
+                <Paragraph lineHeight={20} fontSize={'$3'}>
+                  {initTicketItem.feedback}
+                </Paragraph>
+              </YStack>
+            </Card>
+          )}
         </YStack>
       </ScrollView>
+
+      {initTicketItem.status === 'past' && !initTicketItem.feedback && (
+        <XStack
+          paddingBottom={insets.bottom + 12}
+          boxShadow={'$lg'}
+          backgroundColor={'white'}
+          paddingHorizontal={16}
+          paddingTop={12}
+          width="100%"
+          justifyContent="space-between">
+          <Button
+            theme={'yellow'}
+            borderRadius={0}
+            themeInverse
+            flex={1}
+            onPress={() => {
+              navigation.navigate(SCREENS.FEEDBACK, {
+                ticketItemId: ticketItem.id,
+              });
+            }}
+            height={52}
+            paddingHorizontal={24}>
+            Gửi phản hồi
+          </Button>
+        </XStack>
+      )}
     </YStack>
   );
 }

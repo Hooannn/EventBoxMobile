@@ -14,6 +14,7 @@ import TicketItemDetailScreen from '../screens/tickets/TicketItemDetailScreen';
 import SearchScreen from '../screens/home/SearchScreen';
 import ChangePasswordScreen from '../screens/settings/ChangePasswordScreen';
 import UpdateUserInfoScreen from '../screens/settings/UpdateUserInfoScreen';
+import FeedbackScreen from '../screens/tickets/FeedbackScreen';
 
 export default function DefaultStack() {
   const renderTabIcon = (
@@ -78,6 +79,7 @@ export default function DefaultStack() {
         name={SCREENS.UPDATE_USER_INFO}
         component={UpdateUserInfoScreen}
       />
+      <Stack.Screen name={SCREENS.FEEDBACK} component={FeedbackScreen} />
     </Stack.Navigator>
   );
 }

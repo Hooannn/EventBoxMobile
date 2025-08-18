@@ -248,6 +248,7 @@ export interface ITicketItem {
   ticket_id: number;
   ticket: ITicket;
   place_total: number;
+  feedback?: string;
   traces: ITicketItemTrace[];
 }
 
@@ -258,6 +259,7 @@ export interface ITicketItemDetail {
   ticket: ITicketDetail;
   order: IOrderDetail;
   place_total: number;
+  feedback?: string;
   traces: ITicketItemTrace[];
 }
 

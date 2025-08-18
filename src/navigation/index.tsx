@@ -37,6 +37,7 @@ export const SCREENS = {
   SEARCH: 'Search',
   CHANGE_PASSWORD: 'ChangePassword',
   UPDATE_USER_INFO: 'UpdateUserInfo',
+  FEEDBACK: 'Feedback',
 };
 
 const Navigation = () => {
