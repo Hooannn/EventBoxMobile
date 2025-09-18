@@ -6,8 +6,8 @@ import useAuthStore from '../store/auth.store';
 import {useToastController} from '@tamagui/toast';
 import useRefreshToken from './useRefreshToken';
 
-export const BACKEND_URL = 'https://eventboxserver.eclass.ink/api';
-export const SOCKET_URL = 'https://eventboxsocket.eclass.ink';
+export const BACKEND_URL = 'https://eventboxserver-local.eclass.ink/api';
+export const SOCKET_URL = 'https://eventboxsocket-local.eclass.ink';
 
 export const axiosIns = axios.create({
   baseURL: BACKEND_URL,

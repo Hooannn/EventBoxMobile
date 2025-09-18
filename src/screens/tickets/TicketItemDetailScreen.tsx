@@ -375,18 +375,26 @@ export default function TicketItemDetailScreen() {
                   <XStack key={'Payment' + payment.id}>
                     <Text fontSize={'$3'} width={'50%'}>
                       Ngày:{' '}
-                      <Text fontWeight={'700'}>
-                        {dayjs(payment.captured_at).format('DD/MM/YYYY')}
-                      </Text>
+                      {payment.captured_at ? (
+                        <Text fontWeight={'700'}>
+                          {dayjs(payment.captured_at).format('DD/MM/YYYY')}
+                        </Text>
+                      ) : (
+                        <Text fontWeight={'700'}>Chưa cập nhật</Text>
+                      )}
                     </Text>
                     <Text fontSize={'$3'} width={'50%'}>
                       Số tiền:{' '}
-                      <Text fontWeight={'700'}>
-                        {priceFormatV2(
-                          payment.gross_amount ?? 0,
-                          payment.gross_amount_currency!,
-                        )}
-                      </Text>
+                      {payment.gross_amount ? (
+                        <Text fontWeight={'700'}>
+                          {priceFormatV2(
+                            payment.gross_amount ?? 0,
+                            payment.gross_amount_currency!,
+                          )}
+                        </Text>
+                      ) : (
+                        <Text fontWeight={'700'}>Chưa cập nhật</Text>
+                      )}
                     </Text>
                   </XStack>
                 ))}
