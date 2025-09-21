@@ -169,6 +169,10 @@ export interface IKeyword {
 
 export interface IEventShow {
   id: number;
+  title: string;
+  enabled_seatmap: boolean;
+  seatmap?: string;
+  seatmap_svg?: string;
   created_at: string;
   updated_at: string;
   event_id: number;
@@ -190,6 +194,7 @@ export interface IEventShowDetail {
 
 export interface ITicket {
   id: number;
+  seatmap_block_id?: string;
   created_at: string;
   updated_at: string;
   event_show_id: number;

@@ -11,11 +11,11 @@ import AppBar from '../../components/AppBar';
 import {ChevronDown, ChevronLeft, ChevronUp} from '@tamagui/lucide-icons';
 import {priceFormat} from '../../utils';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {IEvent, IOrder, IResponseData} from '../../types';
+import {IOrder, IResponseData} from '../../types';
 import useToast from '../../hooks/useToast';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import QuantityInput from '../../components/QuantityInput';
-import {useCallback, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
@@ -25,20 +25,27 @@ import useAxios from '../../hooks/useAxios';
 import {useMutation} from '@tanstack/react-query';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import {SCREENS} from '../../navigation';
+import Seatmap from './Seatmap';
+import useAppStore from '../../store/app.store';
 
 export default function CheckOutScreen() {
   const route = useRoute();
-  const {event, eventShowId} = route.params as {
-    event: IEvent;
+  const event = useAppStore(state => state.currentSelectedEvent);
+  const {eventShowId} = route.params as {
     eventShowId: number;
   };
+
   const navigation = useNavigation();
   const axios = useAxios();
   const {toastOnError} = useToast();
   const insets = useSafeAreaInsets();
 
+  const getEventShow = () => {
+    return event?.shows.find(show => show.id === eventShowId);
+  };
+
   const getTickets = () => {
-    return event.shows.find(show => show.id === eventShowId)?.tickets || [];
+    return event?.shows.find(show => show.id === eventShowId)?.tickets || [];
   };
 
   const [orderedTickets, setOrderedTickets] = useState(
@@ -116,6 +123,16 @@ export default function CheckOutScreen() {
     makeReservationMutation.mutate();
   };
 
+  useEffect(() => {
+    orderedTickets.forEach(orderedTicket => {
+      const updatedTicket = getTicketById(orderedTicket.id);
+      if (updatedTicket && orderedTicket.quantity > updatedTicket.stock) {
+        setQuantity(orderedTicket.id, updatedTicket.stock);
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event]);
+
   return (
     <>
       {makeReservationMutation.isPending && <LoadingOverlay />}
@@ -135,65 +152,89 @@ export default function CheckOutScreen() {
               onPress={() => navigation.goBack()}
               icon={<ChevronLeft size={20} />}
             />
-            <Text fontSize={'$7'} fontWeight="bold" color={'white'}>
-              Mua vé
-            </Text>
+
+            {getEventShow()?.enabled_seatmap ? (
+              <YStack>
+                <Text fontSize={'$7'} fontWeight="bold" color={'white'}>
+                  Mua vé
+                </Text>
+                <Text color={'white'}>Bấm vào khu vực để chọn vé</Text>
+              </YStack>
+            ) : (
+              <Text fontSize={'$7'} fontWeight="bold" color={'white'}>
+                Mua vé
+              </Text>
+            )}
           </XStack>
         </AppBar>
 
-        <ScrollView flexGrow={1} width={'100%'}>
-          <YStack flex={1} width={'100%'} padding={16}>
-            <XStack
-              alignItems="center"
-              width={'100%'}
-              justifyContent="space-between">
-              <Text fontSize={'$4'}>Loại vé</Text>
-              <Text fontSize={'$4'}>Số lượng</Text>
-            </XStack>
-            <YStack gap={16} marginTop={16}>
-              {getTickets().map(ticket => (
-                <Stack key={'OrderInputs' + ticket.id}>
-                  <XStack justifyContent="space-between" alignItems="center">
-                    <YStack>
-                      <Text fontSize={'$6'} fontWeight={'700'}>
-                        {ticket.name}
-                      </Text>
-                      <Text
-                        fontSize={'$5'}
-                        fontWeight={'700'}
-                        color={'darkgreen'}>
-                        {priceFormat(ticket.price)}
-                      </Text>
-                      {ticket.stock > 0 ? (
-                        <Text fontSize={'$3'} color={'gray'} fontWeight={'500'}>
-                          Còn {ticket.stock} vé
+        {getEventShow()?.enabled_seatmap ? (
+          <Seatmap
+            getTicketValue={getTicketValue}
+            setQuantity={setQuantity}
+            eventShow={getEventShow()!}
+            onTicketAdded={(ticketId, quantity) => {
+              setQuantity(ticketId, getTicketValue(ticketId) + quantity);
+            }}
+          />
+        ) : (
+          <ScrollView flexGrow={1} width={'100%'}>
+            <YStack flex={1} width={'100%'} padding={16}>
+              <XStack
+                alignItems="center"
+                width={'100%'}
+                justifyContent="space-between">
+                <Text fontSize={'$4'}>Loại vé</Text>
+                <Text fontSize={'$4'}>Số lượng</Text>
+              </XStack>
+              <YStack gap={16} marginTop={16}>
+                {getTickets().map(ticket => (
+                  <Stack key={'OrderInputs' + ticket.id}>
+                    <XStack justifyContent="space-between" alignItems="center">
+                      <YStack>
+                        <Text fontSize={'$6'} fontWeight={'700'}>
+                          {ticket.name}
                         </Text>
-                      ) : (
-                        <Text color={'red'} fontSize={'$3'}>
-                          Hết vé
+                        <Text
+                          fontSize={'$5'}
+                          fontWeight={'700'}
+                          color={'darkgreen'}>
+                          {priceFormat(ticket.price)}
                         </Text>
+                        {ticket.stock > 0 ? (
+                          <Text
+                            fontSize={'$3'}
+                            color={'gray'}
+                            fontWeight={'500'}>
+                            Còn {ticket.stock} vé
+                          </Text>
+                        ) : (
+                          <Text color={'red'} fontSize={'$3'}>
+                            Hết vé
+                          </Text>
+                        )}
+                      </YStack>
+                      {ticket.stock > 0 && (
+                        <Stack alignItems="center" justifyContent="center">
+                          <QuantityInput
+                            value={getTicketValue(ticket.id)}
+                            onChange={quantity => {
+                              setQuantity(ticket.id, quantity);
+                            }}
+                            maxValue={ticket.stock}
+                            minValue={0}
+                            disabled={ticket.stock <= 0}
+                          />
+                        </Stack>
                       )}
-                    </YStack>
-                    {ticket.stock > 0 && (
-                      <Stack alignItems="center" justifyContent="center">
-                        <QuantityInput
-                          value={getTicketValue(ticket.id)}
-                          onChange={quantity => {
-                            setQuantity(ticket.id, quantity);
-                          }}
-                          maxValue={ticket.stock}
-                          minValue={0}
-                          disabled={ticket.stock <= 0}
-                        />
-                      </Stack>
-                    )}
-                  </XStack>
-                  <Separator borderWidth={1} marginTop={12} />
-                </Stack>
-              ))}
+                    </XStack>
+                    <Separator borderWidth={1} marginTop={12} />
+                  </Stack>
+                ))}
+              </YStack>
             </YStack>
-          </YStack>
-        </ScrollView>
+          </ScrollView>
+        )}
         <XStack
           paddingBottom={insets.bottom + 12}
           boxShadow={'$lg'}
@@ -266,15 +307,19 @@ export default function CheckOutScreen() {
                           {priceFormat(getTicketById(ticket.id)!.price)}
                         </Text>
                       </YStack>
-                      <YStack alignItems="flex-end">
-                        <Text fontSize={'$5'}>{getTicketValue(ticket.id)}</Text>
-                        <Text fontSize={'$5'}>
-                          {priceFormat(
-                            getTicketValue(ticket.id) *
-                              getTicketById(ticket.id)!.price,
-                          )}
-                        </Text>
-                      </YStack>
+                      <XStack alignItems="center" gap={8}>
+                        <YStack alignItems="flex-end">
+                          <Text fontSize={'$5'}>
+                            {getTicketValue(ticket.id)}
+                          </Text>
+                          <Text fontSize={'$5'}>
+                            {priceFormat(
+                              getTicketValue(ticket.id) *
+                                getTicketById(ticket.id)!.price,
+                            )}
+                          </Text>
+                        </YStack>
+                      </XStack>
                     </XStack>
                   ))}
               </YStack>

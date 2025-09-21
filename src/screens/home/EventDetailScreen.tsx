@@ -57,6 +57,7 @@ import {useMutation, useQuery} from '@tanstack/react-query';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import {SCREENS} from '../../navigation';
 import {io} from 'socket.io-client';
+import useAppStore from '../../store/app.store';
 
 export default function EventDetailScreen() {
   const route = useRoute();
@@ -67,6 +68,9 @@ export default function EventDetailScreen() {
   const axios = useAxios();
   const authUser = useAuthStore(state => state.user);
   const setAuthUser = useAuthStore(state => state.setUser);
+  const setCurrentSelectedEvent = useAppStore(
+    state => state.setCurrentSelectedEvent,
+  );
 
   const getEventQuery = useQuery({
     queryKey: ['fetch/event/id', eventId],
@@ -99,8 +103,10 @@ export default function EventDetailScreen() {
   }, [event]);
 
   const onBookingPress = (eventShowId: number) => {
+    if (event) {
+      setCurrentSelectedEvent(event);
+    }
     navigation.navigate(SCREENS.CHECK_OUT, {
-      event: event,
       eventShowId,
     });
   };
@@ -217,8 +223,12 @@ export default function EventDetailScreen() {
       console.log('✅ Connected:', socket.id);
     });
 
-    socket.on('stock_updated', e => {
-      getEventQuery.refetch();
+    socket.on('stock_updated', _ => {
+      getEventQuery.refetch().then(res => {
+        if (res.data?.data?.data) {
+          setCurrentSelectedEvent(res.data?.data?.data);
+        }
+      });
     });
 
     socket.on('disconnect', reason => {
