@@ -38,6 +38,7 @@ export const SCREENS = {
   CHANGE_PASSWORD: 'ChangePassword',
   UPDATE_USER_INFO: 'UpdateUserInfo',
   FEEDBACK: 'Feedback',
+  GIVEAWAY: 'Giveaway',
 };
 
 const Navigation = () => {

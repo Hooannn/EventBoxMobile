@@ -1,4 +1,4 @@
-import {ChevronLeft, Ticket} from '@tamagui/lucide-icons';
+import {ChevronLeft, Gift, Ticket} from '@tamagui/lucide-icons';
 import React, {useEffect, useState} from 'react';
 import {
   Button,
@@ -7,6 +7,7 @@ import {
   Paragraph,
   ScrollView,
   Separator,
+  Spacer,
   Spinner,
   Stack,
   Text,
@@ -184,6 +185,21 @@ export default function TicketItemDetailScreen() {
           <Text fontSize={'$7'} fontWeight="bold" color={'white'}>
             Chi tiết vé
           </Text>
+          <Spacer flex={1} />
+          {initTicketItem.status !== 'past' && (
+            <Button
+              backgroundColor={'transparent'}
+              variant="outlined"
+              themeInverse
+              circular
+              onPress={() =>
+                navigation.navigate(SCREENS.GIVEAWAY, {
+                  ticketItemId: ticketItem.id,
+                })
+              }
+              icon={<Gift size={20} />}
+            />
+          )}
         </XStack>
       </AppBar>
 

@@ -15,6 +15,7 @@ import SearchScreen from '../screens/home/SearchScreen';
 import ChangePasswordScreen from '../screens/settings/ChangePasswordScreen';
 import UpdateUserInfoScreen from '../screens/settings/UpdateUserInfoScreen';
 import FeedbackScreen from '../screens/tickets/FeedbackScreen';
+import GiveawayScreen from '../screens/tickets/GiveawayScreen';
 
 export default function DefaultStack() {
   const renderTabIcon = (
@@ -80,6 +81,7 @@ export default function DefaultStack() {
         component={UpdateUserInfoScreen}
       />
       <Stack.Screen name={SCREENS.FEEDBACK} component={FeedbackScreen} />
+      <Stack.Screen name={SCREENS.GIVEAWAY} component={GiveawayScreen} />
     </Stack.Navigator>
   );
 }
