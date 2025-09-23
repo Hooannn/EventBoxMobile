@@ -63,7 +63,7 @@ const WEBVIEW_HTML = `
       const canvas = new fabric.Canvas("c", { selection: false });
       
 
-      const originalWidth = 798;
+      const originalWidth = 698;
       const originalHeight = 498;
 
       document.addEventListener("message", function(event) {
