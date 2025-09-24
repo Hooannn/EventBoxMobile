@@ -532,7 +532,16 @@ export default function EventDetailScreen() {
                       </Accordion>
                     </YStack>
 
-                    <YStack padding={16} gap={12} backgroundColor={'white'}>
+                    <YStack
+                      padding={16}
+                      gap={12}
+                      backgroundColor={'white'}
+                      pressStyle={{opacity: 0.8}}
+                      onPress={() => {
+                        navigation.navigate(SCREENS.ORGANIZATION_DETAIL, {
+                          id: event.organization.id,
+                        });
+                      }}>
                       <Text fontSize={'$6'} fontWeight={'700'}>
                         Ban tổ chức
                       </Text>

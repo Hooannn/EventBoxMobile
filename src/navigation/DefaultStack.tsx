@@ -16,6 +16,7 @@ import ChangePasswordScreen from '../screens/settings/ChangePasswordScreen';
 import UpdateUserInfoScreen from '../screens/settings/UpdateUserInfoScreen';
 import FeedbackScreen from '../screens/tickets/FeedbackScreen';
 import GiveawayScreen from '../screens/tickets/GiveawayScreen';
+import OrganizationDetailScreen from '../screens/home/OrganizationDetailScreen';
 
 export default function DefaultStack() {
   const renderTabIcon = (
@@ -58,6 +59,10 @@ export default function DefaultStack() {
       <Stack.Screen name={SCREENS.TAB_NAVIGATION} component={TabNavigation} />
       <Stack.Screen name={SCREENS.SEARCH} component={SearchScreen} />
       <Stack.Screen name={SCREENS.EVENT_DETAIL} component={EventDetailScreen} />
+      <Stack.Screen
+        name={SCREENS.ORGANIZATION_DETAIL}
+        component={OrganizationDetailScreen}
+      />
       <Stack.Screen name={SCREENS.CHECK_OUT} component={CheckOutScreen} />
       <Stack.Screen name={SCREENS.PAYMENT} component={PaymentScreen} />
       <Stack.Screen

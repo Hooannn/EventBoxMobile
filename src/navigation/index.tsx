@@ -39,6 +39,7 @@ export const SCREENS = {
   UPDATE_USER_INFO: 'UpdateUserInfo',
   FEEDBACK: 'Feedback',
   GIVEAWAY: 'Giveaway',
+  ORGANIZATION_DETAIL: 'OrganizationDetail',
 };
 
 const Navigation = () => {

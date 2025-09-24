@@ -479,31 +479,33 @@ export default function TicketItemDetailScreen() {
         </YStack>
       </ScrollView>
 
-      {initTicketItem.status === 'past' && !initTicketItem.feedback && (
-        <XStack
-          paddingBottom={insets.bottom + 12}
-          boxShadow={'$lg'}
-          backgroundColor={'white'}
-          paddingHorizontal={16}
-          paddingTop={12}
-          width="100%"
-          justifyContent="space-between">
-          <Button
-            theme={'yellow'}
-            borderRadius={0}
-            themeInverse
-            flex={1}
-            onPress={() => {
-              navigation.navigate(SCREENS.FEEDBACK, {
-                ticketItemId: ticketItem.id,
-              });
-            }}
-            height={52}
-            paddingHorizontal={24}>
-            Gửi phản hồi
-          </Button>
-        </XStack>
-      )}
+      {initTicketItem.status === 'past' &&
+        !initTicketItem.feedback &&
+        initTicketItem.traces.length > 0 && (
+          <XStack
+            paddingBottom={insets.bottom + 12}
+            boxShadow={'$lg'}
+            backgroundColor={'white'}
+            paddingHorizontal={16}
+            paddingTop={12}
+            width="100%"
+            justifyContent="space-between">
+            <Button
+              theme={'yellow'}
+              borderRadius={0}
+              themeInverse
+              flex={1}
+              onPress={() => {
+                navigation.navigate(SCREENS.FEEDBACK, {
+                  ticketItemId: ticketItem.id,
+                });
+              }}
+              height={52}
+              paddingHorizontal={24}>
+              Gửi phản hồi
+            </Button>
+          </XStack>
+        )}
     </YStack>
   );
 }

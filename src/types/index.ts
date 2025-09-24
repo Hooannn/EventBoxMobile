@@ -187,6 +187,7 @@ export interface IEventShowDetail {
   id: number;
   created_at: string;
   updated_at: string;
+  title: string;
   start_time: string;
   end_time: string;
   event: IEventDetail;
@@ -240,6 +241,7 @@ export interface IOrderDetail {
   id: number;
   created_at: string;
   updated_at: string;
+  user: IUser;
   status: IOrderStatus;
   payments: IPayment[];
   place_total: number;
@@ -254,6 +256,7 @@ export interface ITicketItem {
   ticket: ITicket;
   place_total: number;
   feedback?: string;
+  feedback_at?: string;
   traces: ITicketItemTrace[];
 }
 
@@ -265,6 +268,7 @@ export interface ITicketItemDetail {
   order: IOrderDetail;
   place_total: number;
   feedback?: string;
+  feedback_at?: string;
   traces: ITicketItemTrace[];
 }
 
