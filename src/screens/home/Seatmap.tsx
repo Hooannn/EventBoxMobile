@@ -7,12 +7,14 @@ import {Minus, Plus, Tickets, Undo2, X} from '@tamagui/lucide-icons';
 import {
   BottomSheetModal,
   BottomSheetModalProvider,
+  BottomSheetScrollView,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import {priceFormat} from '../../utils';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useToastController} from '@tamagui/toast';
 import QuantityInput from '../../components/QuantityInput';
+import BottomSheetBackdrop from '../../components/BottomSheetBackdrop';
 
 const WEBVIEW_HTML = `
   <!DOCTYPE html>
@@ -294,6 +296,13 @@ export default function Seatmap({
         <BottomSheetModal
           ref={ticketPickerBottomSheetModalRef}
           enablePanDownToClose={false}
+          backdropComponent={() => (
+            <BottomSheetBackdrop
+              onPress={() => {
+                ticketPickerBottomSheetModalRef.current?.dismiss();
+              }}
+            />
+          )}
           containerStyle={{zIndex: 101}}>
           <BottomSheetView
             style={{
@@ -377,8 +386,16 @@ export default function Seatmap({
       <BottomSheetModalProvider>
         <BottomSheetModal
           ref={ticketsInfoBottomSheetModalRef}
+          maxDynamicContentSize={screenHeight * 0.8}
+          backdropComponent={() => (
+            <BottomSheetBackdrop
+              onPress={() => {
+                ticketsInfoBottomSheetModalRef.current?.dismiss();
+              }}
+            />
+          )}
           containerStyle={{zIndex: 100}}>
-          <BottomSheetView
+          <BottomSheetScrollView
             style={{
               flex: 1,
             }}>
@@ -440,7 +457,7 @@ export default function Seatmap({
                 ))}
               </YStack>
             </YStack>
-          </BottomSheetView>
+          </BottomSheetScrollView>
         </BottomSheetModal>
       </BottomSheetModalProvider>
     </>

@@ -17,6 +17,7 @@ import UpdateUserInfoScreen from '../screens/settings/UpdateUserInfoScreen';
 import FeedbackScreen from '../screens/tickets/FeedbackScreen';
 import GiveawayScreen from '../screens/tickets/GiveawayScreen';
 import OrganizationDetailScreen from '../screens/home/OrganizationDetailScreen';
+import VoucherDetailScreen from '../screens/home/VoucherDetailScreen';
 
 export default function DefaultStack() {
   const renderTabIcon = (
@@ -65,6 +66,10 @@ export default function DefaultStack() {
       />
       <Stack.Screen name={SCREENS.CHECK_OUT} component={CheckOutScreen} />
       <Stack.Screen name={SCREENS.PAYMENT} component={PaymentScreen} />
+      <Stack.Screen
+        name={SCREENS.VOUCHER_DETAIL}
+        component={VoucherDetailScreen}
+      />
       <Stack.Screen
         name={SCREENS.PAYMENT_PROCESSING}
         component={PaymentProcessingScreen}

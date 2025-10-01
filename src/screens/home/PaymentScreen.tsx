@@ -1,38 +1,72 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import AppBar from '../../components/AppBar';
 import {
   Button,
   Image,
+  Input,
   RadioGroup,
   ScrollView,
   Separator,
+  Spinner,
+  Stack,
   Text,
   XStack,
   YStack,
 } from 'tamagui';
-import {Calendar, ChevronLeft, MapPin} from '@tamagui/lucide-icons';
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Plus,
+  X,
+  XCircle,
+} from '@tamagui/lucide-icons';
 import {
   formatHoursAndMinutes,
   priceFormat,
+  priceFormatV2,
   stringToDateFormatV2,
 } from '../../utils';
 import {CommonActions, useNavigation, useRoute} from '@react-navigation/native';
-import {IEvent, IOrder, IResponseData, ITicket} from '../../types';
+import {IEvent, IOrder, IResponseData, ITicket, IVoucher} from '../../types';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import useAuthStore from '../../store/auth.store';
 import useToast from '../../hooks/useToast';
 import useAxios from '../../hooks/useAxios';
-import {useMutation} from '@tanstack/react-query';
-import {Alert, Linking} from 'react-native';
+import {useMutation, useQuery} from '@tanstack/react-query';
+import {Alert, Linking, useWindowDimensions} from 'react-native';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import InAppBrowser from 'react-native-inappbrowser-reborn';
 import {SCREENS} from '../../navigation';
+import {
+  BottomSheetModal,
+  BottomSheetModalProvider,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet';
+import BottomSheetBackdrop from '../../components/BottomSheetBackdrop';
+import VoucherCard from './VoucherCard';
 
 export default function PaymentScreen() {
   const {toast, toastOnError} = useToast();
   const {user} = useAuthStore();
   const route = useRoute();
+  const {height: screenHeight} = useWindowDimensions();
   const axios = useAxios();
+
+  const [selectedVoucherId, setSelectedVoucherId] = useState<number | null>(
+    null,
+  );
+
+  const [voucherCode, setVoucherCode] = useState('');
+
+  const voucherPickerBottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  const handleVoucherPickerPresentModalPress = useCallback(() => {
+    setVoucherCode('');
+    setSelectedVoucherId(null);
+    voucherPickerBottomSheetModalRef.current?.present();
+  }, []);
 
   const {event, eventShowId, reservation} = route.params as {
     event: IEvent;
@@ -45,6 +79,64 @@ export default function PaymentScreen() {
   const cancelReservationMutation = useMutation({
     mutationFn: () =>
       axios.post<IResponseData<boolean>>('/v1/orders/reservation/cancel'),
+  });
+
+  const getPublicVouchersQuery = useQuery({
+    queryKey: ['fetch/vouchers/event/eventId/public', event.id],
+    queryFn: () =>
+      axios.get<IResponseData<IVoucher[]>>(
+        `/v1/vouchers/event/${event.id}/public`,
+      ),
+    refetchOnWindowFocus: false,
+  });
+
+  const publicVouchers = getPublicVouchersQuery.data?.data.data || [];
+
+  const getOrderVoucher = useQuery({
+    queryKey: ['fetch/vouchers/order/orderId', reservation.id],
+    queryFn: () =>
+      axios.get<IResponseData<IVoucher>>(
+        `/v1/vouchers/order/${reservation.id}`,
+      ),
+    refetchOnWindowFocus: false,
+  });
+
+  const orderVoucher = getOrderVoucher.data?.data.data;
+
+  const applyVoucherMutation = useMutation({
+    mutationFn: (params: {code: string}) =>
+      axios.post<IResponseData<boolean>>(
+        `/v1/vouchers/order/${reservation.id}/apply`,
+        params,
+      ),
+    onError: toastOnError,
+    onSuccess: _ => {
+      getOrderVoucher.refetch();
+      toast.show('Thành công', {
+        message: 'Áp dụng mã giảm giá thành công',
+        customData: {
+          theme: 'green',
+        },
+      });
+      voucherPickerBottomSheetModalRef.current?.dismiss();
+    },
+  });
+
+  const removeVoucherMutation = useMutation({
+    mutationFn: () =>
+      axios.post<IResponseData<boolean>>(
+        `/v1/vouchers/order/${reservation.id}/remove`,
+      ),
+    onError: toastOnError,
+    onSuccess: _ => {
+      getOrderVoucher.refetch();
+      toast.show('Thành công', {
+        message: 'Xoá mã giảm giá thành công',
+        customData: {
+          theme: 'green',
+        },
+      });
+    },
   });
 
   const goBack = async () => {
@@ -235,7 +327,48 @@ export default function PaymentScreen() {
   };
 
   const isLoading =
-    cancelReservationMutation.isPending || paymentMutation.isPending;
+    cancelReservationMutation.isPending ||
+    paymentMutation.isPending ||
+    applyVoucherMutation.isPending ||
+    removeVoucherMutation.isPending ||
+    getOrderVoucher.isLoading;
+
+  const onApplyVoucherButtonPress = () => {
+    if (!voucherCode.trim()) {
+      return;
+    }
+    applyVoucherMutation.mutate({code: voucherCode.trim()});
+  };
+
+  const onDoneVoucherButtonPress = () => {
+    if (selectedVoucherId) {
+      const selectedVoucher = publicVouchers.find(
+        voucher => voucher.id === selectedVoucherId,
+      );
+      if (selectedVoucher) {
+        applyVoucherMutation.mutate({code: selectedVoucher.code});
+      }
+    } else {
+      voucherPickerBottomSheetModalRef.current?.dismiss();
+    }
+  };
+
+  const getTotalDiscount = () => {
+    if (orderVoucher) {
+      let discount = 0;
+      if (orderVoucher.discount_type === 'PERCENTAGE') {
+        discount =
+          reservation.place_total * (orderVoucher.discount_value / 100);
+      } else {
+        discount = orderVoucher.discount_value;
+      }
+      if (discount > reservation.place_total) {
+        return reservation.place_total;
+      }
+      return discount;
+    }
+    return 0;
+  };
 
   return (
     <>
@@ -376,6 +509,58 @@ export default function PaymentScreen() {
               borderRadius={12}
               backgroundColor={'white'}
               padding={16}>
+              <XStack
+                alignItems="center"
+                justifyContent="space-between"
+                onPress={() => {
+                  if (orderVoucher) {
+                    return;
+                  }
+                  handleVoucherPickerPresentModalPress();
+                }}>
+                <Text fontWeight={700} fontSize={'$6'} color={'#38383d'}>
+                  Mã giảm giá
+                </Text>
+                <ChevronRight color={'darkgray'} size={16} />
+              </XStack>
+              <Separator borderWidth={1} />
+              <XStack gap={8}>
+                {orderVoucher ? (
+                  <Button borderRadius={100} size={'$3'} theme={'green'}>
+                    <Text>
+                      {orderVoucher.code} - Giảm{' '}
+                      {orderVoucher.discount_type === 'PERCENTAGE'
+                        ? orderVoucher.discount_value
+                        : priceFormatV2(orderVoucher.discount_value)}
+                      {orderVoucher.discount_type === 'PERCENTAGE' ? '%' : ''}
+                    </Text>
+
+                    <XCircle
+                      size={16}
+                      color={'grey'}
+                      onPress={() => {
+                        removeVoucherMutation.mutate();
+                      }}
+                    />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    borderRadius={100}
+                    size={'$3'}
+                    onPress={handleVoucherPickerPresentModalPress}>
+                    <Plus color={'#38383d'} size={16} />
+                    <Text color={'#38383d'}>Thêm mã giảm giá</Text>
+                  </Button>
+                )}
+              </XStack>
+            </YStack>
+
+            <YStack
+              gap={8}
+              borderRadius={12}
+              backgroundColor={'white'}
+              padding={16}>
               <Text fontWeight={700} fontSize={'$6'} color={'#38383d'}>
                 Thông tin đặt vé
               </Text>
@@ -412,16 +597,29 @@ export default function PaymentScreen() {
                   </XStack>
                 ))}
               </YStack>
+
+              <Separator marginTop={16} />
+
               <XStack
                 width={'100%'}
                 alignItems="center"
-                justifyContent="space-between"
-                marginTop={16}>
+                justifyContent="space-between">
                 <Text fontSize={'$6'}>Tạm tính</Text>
-                <Text fontWeight={700} fontSize={'$7'} color={'darkgreen'}>
+                <Text fontSize={'$6'}>
                   {priceFormat(reservation.place_total)}
                 </Text>
               </XStack>
+
+              <XStack
+                width={'100%'}
+                alignItems="center"
+                justifyContent="space-between">
+                <Text fontSize={'$6'}>Giảm giá</Text>
+                <Text fontSize={'$6'} color={orderVoucher ? 'darkgreen' : ''}>
+                  - {priceFormat(getTotalDiscount())}
+                </Text>
+              </XStack>
+
               <Separator />
 
               <XStack
@@ -430,7 +628,7 @@ export default function PaymentScreen() {
                 justifyContent="space-between">
                 <Text fontSize={'$6'}>Tổng tiền</Text>
                 <Text fontWeight={700} fontSize={'$8'} color={'darkgreen'}>
-                  {priceFormat(reservation.place_total)}
+                  {priceFormat(reservation.place_total - getTotalDiscount())}
                 </Text>
               </XStack>
 
@@ -461,7 +659,7 @@ export default function PaymentScreen() {
               <Text fontSize={'$4'}>Tổng tiền</Text>
               <XStack alignItems="center" gap={8}>
                 <Text fontWeight={700} fontSize={'$8'} color={'darkgreen'}>
-                  {priceFormat(reservation.place_total)}
+                  {priceFormat(reservation.place_total - getTotalDiscount())}
                 </Text>
               </XStack>
             </YStack>
@@ -478,6 +676,143 @@ export default function PaymentScreen() {
           </XStack>
         </XStack>
       </YStack>
+
+      <BottomSheetModalProvider>
+        <BottomSheetModal
+          ref={voucherPickerBottomSheetModalRef}
+          maxDynamicContentSize={screenHeight * 0.8}
+          backdropComponent={() => (
+            <BottomSheetBackdrop
+              onPress={() => {
+                voucherPickerBottomSheetModalRef.current?.dismiss();
+              }}
+            />
+          )}
+          containerStyle={{zIndex: 100}}>
+          <BottomSheetScrollView
+            style={{
+              flex: 1,
+            }}>
+            <YStack
+              flex={1}
+              width={'100%'}
+              paddingHorizontal={24}
+              minHeight={screenHeight * 0.8}
+              paddingBottom={insets.bottom + 12}>
+              <XStack
+                alignItems="center"
+                paddingVertical={12}
+                position="relative"
+                width={'100%'}
+                justifyContent="center">
+                <Text fontSize={'$6'} fontWeight={800}>
+                  Chọn mã giảm giá
+                </Text>
+
+                <Button
+                  position="absolute"
+                  right={0}
+                  onPress={() =>
+                    voucherPickerBottomSheetModalRef.current?.dismiss()
+                  }
+                  circular
+                  icon={<X size={16} />}
+                />
+              </XStack>
+              <Separator />
+              <YStack gap={8} marginTop={16} flex={1}>
+                <XStack alignItems="center" justifyContent="space-between">
+                  <Input
+                    placeholder={`Nhập mã giảm giá`}
+                    returnKeyType="done"
+                    width={'70%'}
+                    height={48}
+                    borderRadius={0}
+                    value={voucherCode}
+                    onChangeText={setVoucherCode}
+                  />
+                  <Button
+                    height={48}
+                    theme={'accent'}
+                    borderRadius={0}
+                    onPress={onApplyVoucherButtonPress}
+                    paddingHorizontal={24}>
+                    Áp dụng
+                  </Button>
+                </XStack>
+
+                <Text fontSize={'$4'} marginTop={8}>
+                  Mã giảm giá từ ban tổ chức
+                </Text>
+
+                {getPublicVouchersQuery.isPending ? (
+                  <Stack
+                    alignItems="center"
+                    justifyContent="center"
+                    paddingTop={16}>
+                    <Spinner />
+                  </Stack>
+                ) : (
+                  <>
+                    {publicVouchers.length > 0 ? (
+                      <YStack gap={8}>
+                        {publicVouchers.map(voucher => (
+                          <VoucherCard
+                            key={'VoucherPickerCard' + voucher.id}
+                            isSelected={selectedVoucherId === voucher.id}
+                            onPress={() => {
+                              if (selectedVoucherId === voucher.id) {
+                                setSelectedVoucherId(null);
+                              } else {
+                                setSelectedVoucherId(voucher.id);
+                              }
+                            }}
+                            voucher={voucher}
+                          />
+                        ))}
+                      </YStack>
+                    ) : (
+                      <Stack
+                        alignItems="center"
+                        justifyContent="center"
+                        paddingTop={16}>
+                        <Text color="gray">Không có mã giảm giá nào</Text>
+                      </Stack>
+                    )}
+                  </>
+                )}
+              </YStack>
+            </YStack>
+          </BottomSheetScrollView>
+          <XStack
+            backgroundColor={'white'}
+            gap={12}
+            paddingTop={12}
+            paddingHorizontal={24}
+            paddingBottom={insets.bottom + 12}>
+            <Button
+              theme={'red'}
+              borderRadius={0}
+              onPress={() =>
+                voucherPickerBottomSheetModalRef.current?.dismiss()
+              }
+              flex={1}
+              height={52}
+              paddingHorizontal={24}>
+              Huỷ bỏ
+            </Button>
+            <Button
+              theme={'accent'}
+              borderRadius={0}
+              flex={1}
+              height={52}
+              onPress={onDoneVoucherButtonPress}
+              paddingHorizontal={24}>
+              Xong
+            </Button>
+          </XStack>
+        </BottomSheetModal>
+      </BottomSheetModalProvider>
     </>
   );
 }

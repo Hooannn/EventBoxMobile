@@ -142,7 +142,7 @@ export default function GiveawayScreen() {
                   }}
                   render={({field: {onChange, onBlur, value}}) => (
                     <Input
-                      placeholder={`Nhập email của bạn`}
+                      placeholder={`Nhập email của người nhận`}
                       returnKeyType="next"
                       theme={errors.recipient_email ? 'red' : 'default'}
                       height={54}

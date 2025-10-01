@@ -25,15 +25,18 @@ import useAxios from '../../hooks/useAxios';
 import {useMutation, useQuery} from '@tanstack/react-query';
 import {ICategory, IEvent, IResponseData} from '../../types';
 import provinces from '../../utils/all-in-one.json';
-import {FlatList} from 'react-native';
+import {FlatList, useWindowDimensions} from 'react-native';
 import EventCard from './EventCard';
 import {SCREENS} from '../../navigation';
+import BottomSheetBackdrop from '../../components/BottomSheetBackdrop';
 
 export default function SearchScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const route = useRoute();
   const params = route.params as {initCategoryId: number};
+
+  const {height: screenHeight} = useWindowDimensions();
 
   const [internalSelectedCategories, setInternalSelectedCategories] = useState<
     number[]
@@ -307,7 +310,17 @@ export default function SearchScreen() {
       </YStack>
 
       <BottomSheetModalProvider>
-        <BottomSheetModal ref={bottomSheetModalRef} maxDynamicContentSize={700}>
+        <BottomSheetModal
+          ref={bottomSheetModalRef}
+          containerStyle={{zIndex: 101}}
+          maxDynamicContentSize={screenHeight * 0.8}
+          backdropComponent={() => (
+            <BottomSheetBackdrop
+              onPress={() => {
+                bottomSheetModalRef.current?.dismiss();
+              }}
+            />
+          )}>
           <BottomSheetScrollView
             style={{
               flex: 1,
