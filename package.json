@@ -5,6 +5,7 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "android:build:release": "yarn android --mode release",
     "android:build:debug": "cd android && ./gradlew clean && ./gradlew assembleDebug && cd ..",
     "android:clean": "cd android && ./gradlew clean && cd ..",
     "ios:install:pods": "cd ios && bundle exec pod install && cd ..",

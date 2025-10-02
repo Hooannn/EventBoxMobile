@@ -310,3 +310,25 @@ export interface IPayment {
   receivable?: number | null;
   receivable_amount_currency?: string | null;
 }
+
+export type DiscountType = 'PERCENTAGE' | 'FIXED_AMOUNT';
+
+export interface IVoucher {
+  id: number;
+  event: IEvent;
+  code: string;
+  name: string;
+  description?: string;
+  discount_type: DiscountType;
+  discount_value: number;
+  valid_from: string;
+  valid_to: string;
+  usage_limit?: number;
+  per_user_limit?: number;
+  is_active: boolean;
+  is_public: boolean;
+  min_order_value?: number;
+  min_ticket_quantity?: number;
+  created_at: string;
+  updated_at: string;
+}

@@ -40,6 +40,7 @@ export const SCREENS = {
   FEEDBACK: 'Feedback',
   GIVEAWAY: 'Giveaway',
   ORGANIZATION_DETAIL: 'OrganizationDetail',
+  VOUCHER_DETAIL: 'VoucherDetail',
 };
 
 const Navigation = () => {

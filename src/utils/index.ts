@@ -78,6 +78,9 @@ const stringToDateFormat = (date: string) =>
 const stringToDateFormatV2 = (date: string) =>
   dayjs(date).format('HH:mm, D MMMM, YYYY');
 
+const stringToDateFormatV3 = (date: string) =>
+  dayjs(date).format('D MMMM, YYYY');
+
 const getEventLogo = (event: IEvent) => {
   if (event.assets && event.assets.length > 0) {
     const logo = event.assets.find(asset => asset.usage === 'EVENT_LOGO');
@@ -197,4 +200,5 @@ export {
   getFirstShowStartTimeV2,
   getMinimumShowTicketPrice,
   stringToDateFormatV2,
+  stringToDateFormatV3,
 };
