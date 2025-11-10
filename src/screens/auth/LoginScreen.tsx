@@ -76,6 +76,38 @@ export default function LoginScreen() {
     },
   });
 
+  const signInWithGoogleMutation = useMutation({
+    mutationFn: (params: {idToken: string}) => {
+      return rawAxios.post<
+        IResponseData<{
+          user: IUser;
+          access_token: string;
+          refresh_token: string;
+        }>
+      >('/v1/auth/google/tokeninfo', {
+        id_token: params.idToken,
+      });
+    },
+
+    onError: toastOnError,
+    onSuccess: res => {
+      toast.show('Thành công!', {
+        message: getMessage(res.data.message) ?? 'Đăng nhập thành công',
+        customData: {
+          theme: 'green',
+        },
+      });
+      const data = res.data?.data;
+      const user = data?.user;
+      const accessToken = data?.access_token;
+      const refreshToken = data?.refresh_token;
+      setAccessToken(accessToken);
+      setRefreshToken(refreshToken);
+      setLoggedIn(true);
+      setUser(user);
+    },
+  });
+
   const onSubmit: SubmitHandler<LoginInputs> = data => {
     signInMutation.mutate(data);
   };
@@ -83,13 +115,23 @@ export default function LoginScreen() {
   const signInWithGoogle = async () => {
     try {
       await GoogleSignin.hasPlayServices();
+      const isSignedIn = GoogleSignin.hasPreviousSignIn();
+      if (isSignedIn) {
+        await GoogleSignin.signOut();
+      }
       const response = await GoogleSignin.signIn();
       if (isSuccessResponse(response)) {
-        console.log('Google Sign-In response:', response);
-      } else {
-        console.error('Google Sign-In failed:', response);
+        const tokens = await GoogleSignin.getTokens();
+        const idToken = tokens.idToken;
+        signInWithGoogleMutation.mutate({idToken});
       }
     } catch (error) {
+      toast.show('Có lỗi xảy ra', {
+        message: 'Đăng nhập với Google thất bại, vui lòng thử lại',
+        customData: {
+          theme: 'red',
+        },
+      });
       console.error('Google Sign-In error:', error);
       if (isErrorWithCode(error)) {
         console.error('Error code:', error.code);
@@ -109,9 +151,12 @@ export default function LoginScreen() {
     }
   };
 
+  const isLoading =
+    signInMutation.isPending || signInWithGoogleMutation.isPending;
+
   return (
     <>
-      {signInMutation.isPending && <LoadingOverlay />}
+      {isLoading && <LoadingOverlay />}
       <KeyboardAwareScrollView
         enableOnAndroid
         contentContainerStyle={{flexGrow: 1}}>

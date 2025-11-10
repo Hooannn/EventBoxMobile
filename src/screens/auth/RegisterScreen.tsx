@@ -7,12 +7,19 @@ import {TextInput} from 'react-native';
 import {CommonActions, useNavigation} from '@react-navigation/native';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {rawAxios} from '../../hooks/useAxios';
-import {IResponseData} from '../../types';
+import {IResponseData, IUser} from '../../types';
 import useToast from '../../hooks/useToast';
 import {getMessage} from '../../utils';
 import {useMutation} from '@tanstack/react-query';
 import LoadingOverlay from '../../components/LoadingOverlay';
 import {SCREENS} from '../../navigation';
+import {
+  GoogleSignin,
+  isErrorWithCode,
+  isSuccessResponse,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import useAuthStore from '../../store/auth.store';
 type RegisterInputs = {
   first_name: string;
   last_name: string;
@@ -31,6 +38,9 @@ export default function RegisterScreen() {
     watch,
   } = useForm<RegisterInputs>();
   const {toastOnError} = useToast();
+
+  const {setAccessToken, setRefreshToken, setLoggedIn, setUser} =
+    useAuthStore();
 
   const password = watch('password', '');
 
@@ -71,6 +81,38 @@ export default function RegisterScreen() {
     },
   });
 
+  const signInWithGoogleMutation = useMutation({
+    mutationFn: (params: {idToken: string}) => {
+      return rawAxios.post<
+        IResponseData<{
+          user: IUser;
+          access_token: string;
+          refresh_token: string;
+        }>
+      >('/v1/auth/google/tokeninfo', {
+        id_token: params.idToken,
+      });
+    },
+
+    onError: toastOnError,
+    onSuccess: res => {
+      toast.show('Thành công!', {
+        message: getMessage(res.data.message) ?? 'Đăng nhập thành công',
+        customData: {
+          theme: 'green',
+        },
+      });
+      const data = res.data?.data;
+      const user = data?.user;
+      const accessToken = data?.access_token;
+      const refreshToken = data?.refresh_token;
+      setAccessToken(accessToken);
+      setRefreshToken(refreshToken);
+      setLoggedIn(true);
+      setUser(user);
+    },
+  });
+
   const onSubmit: SubmitHandler<RegisterInputs> = async data => {
     await signUpMutation.mutateAsync({
       email: data.email,
@@ -83,9 +125,51 @@ export default function RegisterScreen() {
     });
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const isSignedIn = GoogleSignin.hasPreviousSignIn();
+      if (isSignedIn) {
+        await GoogleSignin.signOut();
+      }
+      const response = await GoogleSignin.signIn();
+      if (isSuccessResponse(response)) {
+        const tokens = await GoogleSignin.getTokens();
+        const idToken = tokens.idToken;
+        signInWithGoogleMutation.mutate({idToken});
+      }
+    } catch (error) {
+      toast.show('Có lỗi xảy ra', {
+        message: 'Đăng nhập với Google thất bại, vui lòng thử lại',
+        customData: {
+          theme: 'red',
+        },
+      });
+      console.error('Google Sign-In error:', error);
+      if (isErrorWithCode(error)) {
+        console.error('Error code:', error.code);
+        switch (error.code) {
+          case statusCodes.IN_PROGRESS:
+            // operation (eg. sign in) already in progress
+            break;
+          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+            // Android only, play services not available or outdated
+            break;
+          default:
+          // some other error happened
+        }
+      } else {
+        // an error that's not related to google sign in occurred
+      }
+    }
+  };
+
+  const isLoading =
+    signUpMutation.isPending || signInWithGoogleMutation.isPending;
+
   return (
     <>
-      {signUpMutation.isPending && <LoadingOverlay />}
+      {isLoading && <LoadingOverlay />}
       <KeyboardAwareScrollView
         enableOnAndroid
         contentContainerStyle={{flexGrow: 1}}>
@@ -303,7 +387,7 @@ export default function RegisterScreen() {
                 }
                 borderRadius={0}
                 height={54}
-                onPress={() => toast.show('Đăng nhập thành công!')}>
+                onPress={signInWithGoogle}>
                 Tiếp tục với Google
               </Button>
               <Button

@@ -29,6 +29,7 @@ import {
   UserCircle,
 } from '@tamagui/lucide-icons';
 import {SCREENS} from '../../navigation';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
 
 export default function SettingsScreen() {
   const axios = useAxios();
@@ -58,6 +59,10 @@ export default function SettingsScreen() {
   const logout = async () => {
     logoutMutation.mutateAsync().finally(() => {
       resetAuthStore();
+      const isSignedIn = GoogleSignin.hasPreviousSignIn();
+      if (isSignedIn) {
+        GoogleSignin.signOut();
+      }
     });
   };
 
