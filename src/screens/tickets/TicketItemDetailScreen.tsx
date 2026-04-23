@@ -85,6 +85,8 @@ export default function TicketItemDetailScreen() {
     return expirationDate.getTime();
   };
 
+  const isFulfilled = ticketItem.order.status === 'FULFILLED';
+
   useEffect(() => {
     if (qrCode) {
       const diff = extractExpirationTime(qrCode);
@@ -336,29 +338,46 @@ export default function TicketItemDetailScreen() {
                     gap={2}
                     alignItems="center"
                     flexDirection="column">
-                    {getQrCodeQuery.isLoading ? (
-                      <Spinner />
-                    ) : (
-                      <>
-                        {qrCode ? (
-                          <>
-                            <QRCode size={100} value={qrCode} />
-                            <Text fontSize={'$2'} color={'gray'}>
-                              Hết hạn trong {remainingTime}
-                            </Text>
-                          </>
-                        ) : (
-                          <>
-                            <Ticket size={100} color={'lightgray'} />
-                            <Text fontSize={'$3'} color={'gray'}>
-                              {initTicketItem.status === 'past'
-                                ? 'Chương trình đã kết thúc.'
-                                : 'Chương trình chưa bắt đầu. Vui lòng quay lại sau.'}
-                            </Text>
-                          </>
-                        )}
-                      </>
-                    )}
+                    <>
+                      {isFulfilled ? (
+                        <>
+                          {getQrCodeQuery.isLoading ? (
+                            <Spinner />
+                          ) : (
+                            <>
+                              {qrCode ? (
+                                <>
+                                  <QRCode size={100} value={qrCode} />
+                                  <Text fontSize={'$2'} color={'gray'}>
+                                    Hết hạn trong {remainingTime}
+                                  </Text>
+                                </>
+                              ) : (
+                                <>
+                                  <Ticket size={100} color={'lightgray'} />
+                                  <Text fontSize={'$3'} color={'gray'}>
+                                    {initTicketItem.status === 'past'
+                                      ? 'Chương trình đã kết thúc.'
+                                      : 'Chương trình chưa bắt đầu. Vui lòng quay lại sau.'}
+                                  </Text>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <Ticket size={100} color={'lightgray'} />
+                          <Text
+                            fontSize={'$3'}
+                            textAlign="center"
+                            color={'gray'}>
+                            Vé đang chờ xử lý. Vui lòng kiểm tra lại đơn hàng
+                            của bạn.
+                          </Text>
+                        </>
+                      )}
+                    </>
                   </Stack>
                 </YStack>
               </Stack>

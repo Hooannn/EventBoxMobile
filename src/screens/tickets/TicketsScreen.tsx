@@ -123,11 +123,12 @@ export default function TicketsScreen() {
             alignItems="center"
             paddingVertical={4}
             paddingHorizontal={16}
+            gap={4}
             justifyContent="space-between">
             {tabs().map((tab, index) => (
               <Button
                 key={'Tab' + tab.key}
-                width={'33%'}
+                flex={1}
                 theme={tabIndex === index ? 'accent' : 'default'}
                 onPress={() => {
                   setTabIndex(index);

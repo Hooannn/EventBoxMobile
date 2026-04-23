@@ -6,8 +6,8 @@ import useAuthStore from '../store/auth.store';
 import {useToastController} from '@tamagui/toast';
 import useRefreshToken from './useRefreshToken';
 
-export const BACKEND_URL = 'https://eventboxserver-local.eclass.ink/api';
-export const SOCKET_URL = 'https://eventboxsocket-local.eclass.ink';
+export const BACKEND_URL = 'https://eventboxserver-local.htdev.space/api';
+export const SOCKET_URL = 'https://eventboxsocket-local.htdev.space';
 
 export const axiosIns = axios.create({
   baseURL: BACKEND_URL,
@@ -24,6 +24,23 @@ export const rawAxios = axios.create({
     'Access-Control-Allow-Origin': '*',
   },
 });
+
+let isRefreshing = false;
+let failedQueue: {
+  resolve: (value?: unknown) => void;
+  reject: (reason?: any) => void;
+}[] = [];
+
+const processQueue = (error: any, token?: string) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 const useAxios = () => {
   const toast = useToastController();
@@ -71,20 +88,45 @@ const useAxios = () => {
     const responseIntercept = axiosIns.interceptors.response.use(
       response => response,
       async error => {
-        const prevRequest = error?.config;
-        if (error?.response?.status === 401 && !prevRequest?.sent) {
-          prevRequest.sent = true;
-          let token: string | null = null;
-          try {
-            token = await refreshToken();
-          } catch (error) {
-            handleError();
-            return Promise.reject(error);
+        const originalRequest = error?.config;
+        if (error?.response?.status === 401 && !originalRequest._retry) {
+          if (isRefreshing) {
+            // Nếu đang refresh, đẩy request này vào hàng đợi (Queue)
+            return new Promise((resolve, reject) => {
+              failedQueue.push({resolve, reject});
+            })
+              .then((token: unknown) => {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                return axiosIns(originalRequest);
+              })
+              .catch(err => Promise.reject(err));
           }
-          prevRequest.headers.Authorization = `Bearer ${token}`;
-          return axiosIns({
-            ...prevRequest,
-            headers: prevRequest.headers.toJSON(),
+
+          originalRequest._retry = true;
+          isRefreshing = true;
+
+          return new Promise((resolve, reject) => {
+            refreshToken()
+              .then(newToken => {
+                if (!newToken) {
+                  processQueue(new Error('Refresh failed'));
+                  reject(error);
+                  handleError();
+                  return;
+                }
+
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                processQueue(null, newToken);
+                resolve(axiosIns(originalRequest));
+              })
+              .catch(err => {
+                processQueue(err);
+                reject(err);
+                handleError();
+              })
+              .finally(() => {
+                isRefreshing = false;
+              });
           });
         }
         return Promise.reject(error);

@@ -78,7 +78,9 @@ export default function PaymentScreen() {
 
   const cancelReservationMutation = useMutation({
     mutationFn: () =>
-      axios.post<IResponseData<boolean>>('/v1/orders/reservation/cancel'),
+      axios.post<IResponseData<boolean>>(
+        `/v1/orders/${reservation.id}/reservation/cancel`,
+      ),
   });
 
   const getPublicVouchersQuery = useQuery({
@@ -245,7 +247,7 @@ export default function PaymentScreen() {
     onError: toastOnError,
     onSuccess(data) {
       const orderId = data.data.data.id;
-      const checkoutUrl = `https://www.sandbox.paypal.com/checkoutnow?token=${orderId}`;
+      const checkoutUrl = `https://www.sandbox.paypal.com/checkoutnow?token=${orderId}&country.x=VN&locale.x=vi_VN`;
       openPayPalPopup(checkoutUrl);
     },
   });
@@ -322,6 +324,7 @@ export default function PaymentScreen() {
           theme: 'yellow',
         },
       });
+      goBack();
     }
     Linking.removeAllListeners('url');
   };

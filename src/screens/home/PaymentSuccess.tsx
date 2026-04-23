@@ -27,7 +27,7 @@ export default function PaymentSuccessScreen() {
           Thanh toán thành công!
         </Text>
         <Text maxWidth={'80%'} textAlign="center" fontSize="$5" color="$color">
-          Đơn hàng <Text fontWeight={700}>#{orderId}</Text> của bạn đã được xử
+          Đơn hàng <Text fontWeight={700}>#{orderId}</Text> của bạn đang được xử
           lý.
         </Text>
         <Text maxWidth={'80%'} textAlign="center" fontSize="$5" color="$color">
