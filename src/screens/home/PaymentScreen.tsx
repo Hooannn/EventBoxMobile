@@ -324,7 +324,6 @@ export default function PaymentScreen() {
           theme: 'yellow',
         },
       });
-      goBack();
     }
     Linking.removeAllListeners('url');
   };

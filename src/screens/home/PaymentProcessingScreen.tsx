@@ -29,18 +29,8 @@ export default function PaymentProcessingScreen() {
       console.log('✅ Connected:', socket.id);
     });
 
-    // socket.on('order_fulfilled', e => {
-    //   console.log('🎉 Order fulfilled:', e);
-    //   navigation.dispatch(
-    //     CommonActions.reset({
-    //       index: 0,
-    //       routes: [{name: SCREENS.PAYMENT_SUCCESS, params: {orderId}}],
-    //     }),
-    //   );
-    // });
-
-    socket.on('order_approved', e => {
-      console.log('🎉 Order approved:', e);
+    socket.on('order_fulfilled', e => {
+      console.log('🎉 Order fulfilled:', e);
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -48,6 +38,16 @@ export default function PaymentProcessingScreen() {
         }),
       );
     });
+
+    // socket.on('order_approved', e => {
+    //   console.log('🎉 Order approved:', e);
+    //   navigation.dispatch(
+    //     CommonActions.reset({
+    //       index: 0,
+    //       routes: [{name: SCREENS.PAYMENT_SUCCESS, params: {orderId}}],
+    //     }),
+    //   );
+    // });
 
     socket.on('disconnect', reason => {
       console.log('❌ Disconnected:', reason);
