@@ -18,6 +18,7 @@ import FeedbackScreen from '../screens/tickets/FeedbackScreen';
 import GiveawayScreen from '../screens/tickets/GiveawayScreen';
 import OrganizationDetailScreen from '../screens/home/OrganizationDetailScreen';
 import VoucherDetailScreen from '../screens/home/VoucherDetailScreen';
+import PaymentFailedScreen from '../screens/home/PaymentFailed';
 
 export default function DefaultStack() {
   const renderTabIcon = (
@@ -77,6 +78,10 @@ export default function DefaultStack() {
       <Stack.Screen
         name={SCREENS.PAYMENT_SUCCESS}
         component={PaymentSuccessScreen}
+      />
+      <Stack.Screen
+        name={SCREENS.PAYMENT_FAILED}
+        component={PaymentFailedScreen}
       />
       <Stack.Screen
         name={SCREENS.TICKET_ITEM_DETAIL}

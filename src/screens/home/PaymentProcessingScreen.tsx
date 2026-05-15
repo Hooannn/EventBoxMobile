@@ -39,15 +39,15 @@ export default function PaymentProcessingScreen() {
       );
     });
 
-    // socket.on('order_approved', e => {
-    //   console.log('🎉 Order approved:', e);
-    //   navigation.dispatch(
-    //     CommonActions.reset({
-    //       index: 0,
-    //       routes: [{name: SCREENS.PAYMENT_SUCCESS, params: {orderId}}],
-    //     }),
-    //   );
-    // });
+    socket.on('order_refunded', e => {
+      console.log('🎉 Order refunded:', e);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{name: SCREENS.PAYMENT_FAILED, params: {orderId}}],
+        }),
+      );
+    });
 
     socket.on('disconnect', reason => {
       console.log('❌ Disconnected:', reason);

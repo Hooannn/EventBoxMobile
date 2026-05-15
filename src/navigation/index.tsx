@@ -30,6 +30,7 @@ export const SCREENS = {
   PAYMENT: 'Payment',
   PAYMENT_PROCESSING: 'PaymentProcessing',
   PAYMENT_SUCCESS: 'PaymentSuccess',
+  PAYMENT_FAILED: 'PaymentFailed',
   TICKET_ITEM_DETAIL: 'TicketItemDetail',
   ORGANIZATION: 'Organization',
   SCAN_TICKET: 'ScanTicket',
