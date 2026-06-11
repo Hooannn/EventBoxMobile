@@ -5,9 +5,9 @@ import {getUniqueId} from 'react-native-device-info';
 import useAuthStore from '../store/auth.store';
 import {useToastController} from '@tamagui/toast';
 import useRefreshToken from './useRefreshToken';
+import {BACKEND_URL, SOCKET_URL} from '../config/env';
 
-export const BACKEND_URL = 'https://eventboxserver-local.htdev.space/api';
-export const SOCKET_URL = 'https://eventboxsocket-local.htdev.space';
+export {BACKEND_URL, SOCKET_URL};
 
 export const axiosIns = axios.create({
   baseURL: BACKEND_URL,
@@ -65,9 +65,9 @@ const useAxios = () => {
   useEffect(() => {
     const requestIntercept = axiosIns.interceptors.request.use(
       async config => {
-        if (!config.headers['Authorization']) {
+        if (!config.headers.Authorization) {
           const token = accessToken;
-          config.headers['Authorization'] = `Bearer ${token}`;
+          config.headers.Authorization = `Bearer ${token}`;
         }
         if (!config.headers['x-device-id']) {
           if (!deviceId) {
